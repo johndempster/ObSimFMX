@@ -9,7 +9,7 @@ unit Shared;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, FMX.Dialogs {nidaq};
+  SysUtils, {WinTypes, WinProcs, Messages,} Classes, FMX.Dialogs {nidaq};
 
 const
      MaxSingle = 1E38 ;
@@ -21,7 +21,7 @@ const
   procedure AppendFloat(  var Dest : array of ansichar;  Keyword : string ; Value : Extended ) ;
   procedure ReadFloat(  const Source : array of ansichar;  Keyword : string ; var Value : Single ) ;
   procedure AppendInt( var Dest : array of ansichar;  Keyword : string ; Value : LongInt ) ;
-  procedure ReadInt(  const Source : array of ansichar;  Keyword : string ; var Value : LongInt ) ;
+  procedure ReadInt(  const Source : array of ansichar;  Keyword : string ; var Value : Integer ) ;
   procedure AppendLogical( var Dest : array of ansichar;  Keyword : string ; Value : Boolean ) ;
   procedure ReadLogical(  const Source : array of ansichar;  Keyword : string ; var Value : Boolean ) ;
   procedure AppendString( var Dest : Array of ansichar; Keyword, Value : string ) ;
@@ -150,7 +150,7 @@ begin
 procedure ReadInt(
           const Source : Array of ansichar;
           Keyword : string ;
-          var Value : LongInt ) ;
+          var Value : Integer ) ;
 var
    Parameter : string ;
 begin

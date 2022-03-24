@@ -647,7 +647,7 @@ procedure TMainFrm.SetStockConcentrationList(
 // ------------------------------------------
 var
     i : Integer ;
-    x : Single ;
+    x : DOuble ;
 begin
 
 //     iDrug := Integer(cbAgonist.Items.Objects[cbAgonist.ItemIndex]) ;
@@ -760,8 +760,8 @@ procedure TMainFrm.bAddAgonistClick(Sender: TObject);
 // Add volume of agonist stock solution to bath
 // --------------------------------------------
 var
-     StockConcentration : Single ;
-     AddedConcentration : Single ;
+     StockConcentration : Double ;
+     AddedConcentration : Double ;
      iDrug : Integer ;
      ChartAnnotation : String ;
 begin
@@ -774,7 +774,7 @@ begin
 
      // Add drug
      iDrug := Integer(cbAgonist.Items.Objects[cbAgonist.ItemIndex]) ;
-     StockConcentration := Single( cbAgonistStockConc.Items.Objects[cbAgonistStockConc.ItemIndex]) ;
+     StockConcentration := Double( cbAgonistStockConc.Items.Objects[cbAgonistStockConc.ItemIndex]) ;
 
      // Calculate change in final bath concentration
      AddedConcentration :=  (StockConcentration*edAgonistVolume.Value) / Model.BathVolume ;
@@ -805,8 +805,8 @@ procedure TMainFrm.bAddAntagonistClick(Sender: TObject);
 // Add volume of antagonist stock solution to bath
 // -----------------------------------------------
 var
-     StockConcentration : Single ;
-     AddedConcentration : Single ;
+     StockConcentration : Double ;
+     AddedConcentration : Double ;
      iDrug : Integer ;
      ChartAnnotation : String ;
 begin
@@ -819,7 +819,7 @@ begin
 
      // Add drug
      iDrug := Integer(cbAntagonist.Items.Objects[cbAntagonist.ItemIndex]) ;
-     StockConcentration := Single( cbAntagonistStockConc.Items.Objects[cbAntagonistStockConc.ItemIndex]) ;
+     StockConcentration := Double( cbAntagonistStockConc.Items.Objects[cbAntagonistStockConc.ItemIndex]) ;
 
      // Calculate change in final bath concentration
      AddedConcentration :=  (StockConcentration*edAntagonistVolume.Value) / Model.BathVolume ;
@@ -850,8 +850,8 @@ procedure TMainFrm.bAddUnknownClick(Sender: TObject);
 // Add volume of unknown drug stock solution to bath
 // -------------------------------------------------
 var
-     StockConcentration : Single ;
-     AddedConcentration : Single ;
+     StockConcentration : Double ;
+     AddedConcentration : Double ;
      iDrug : Integer ;
      ChartAnnotation : String ;
 begin
@@ -864,7 +864,7 @@ begin
 
      // Add drug
      iDrug := Integer(cbUnknown.Items.Objects[cbUnknown.ItemIndex]) ;
-     StockConcentration := Single( cbUnknownStockConc.Items.Objects[cbUnknownStockConc.ItemIndex]) ;
+     StockConcentration := Double( cbUnknownStockConc.Items.Objects[cbUnknownStockConc.ItemIndex]) ;
 
      // Calculate change in final bath concentration
      AddedConcentration :=  (StockConcentration*edUnknownVolume.Value) / Model.BathVolume ;
@@ -1387,8 +1387,9 @@ begin
      nil, SW_SHOWNORMAL) ;
     {$ENDIF}
     {$IFDEF MACOS}
-      _system(PAnsiChar('open ' + AnsiString(filename)));
+ //     _system(PAnsiChar('open ' + AnsiString(filename)));
     {$ENDIF}
+
 
      end;
 

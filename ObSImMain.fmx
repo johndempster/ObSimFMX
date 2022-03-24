@@ -28,7 +28,7 @@ object MainFrm: TMainFrm
       Size.Height = 798.000000000000000000
       Size.PlatformDefault = False
       TabIndex = 0
-      TabOrder = 0
+      TabOrder = 1
       TabPosition = PlatformDefault
       Sizes = (
         1153s
@@ -5472,7 +5472,7 @@ object MainFrm: TMainFrm
       Size.Height = 100.000000000000000000
       Size.PlatformDefault = False
       Text = ' Tissue Type '
-      TabOrder = 0
+      TabOrder = 1
       object bNewExperiment: TButton
         Anchors = [akLeft, akTop, akRight]
         Hint = 'Erase existing chart data and select a new experiment.'
@@ -5482,7 +5482,7 @@ object MainFrm: TMainFrm
         Size.Width = 233.000000000000000000
         Size.Height = 24.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 0
+        TabOrder = 1
         Text = 'New Experiment'
         OnClick = bNewExperimentClick
       end
@@ -5497,7 +5497,7 @@ object MainFrm: TMainFrm
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
         StyleLookup = 'ComboBoxstyle'
-        TabOrder = 3
+        TabOrder = 4
       end
     end
     object StimulusGrp: TGroupBox
@@ -5508,7 +5508,7 @@ object MainFrm: TMainFrm
       Size.Height = 97.000000000000000000
       Size.PlatformDefault = False
       Text = ' Stimulus '
-      TabOrder = 2
+      TabOrder = 3
       object bStimulationOn: TButton
         Hint = 'Turn electrical stimulation on'
         Position.X = 16.000000000000000000
@@ -5516,7 +5516,7 @@ object MainFrm: TMainFrm
         Size.Width = 60.000000000000000000
         Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 0
+        TabOrder = 1
         Text = 'On'
         OnClick = bStimulationOnClick
       end
@@ -5528,7 +5528,7 @@ object MainFrm: TMainFrm
         Size.Width = 60.000000000000000000
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 1
+        TabOrder = 2
         Text = 'Off'
         OnClick = bStimulationOffClick
       end
@@ -5540,10 +5540,10 @@ object MainFrm: TMainFrm
         Size.Height = 73.000000000000000000
         Size.PlatformDefault = False
         Text = ' Frequency '
-        TabOrder = 2
+        TabOrder = 3
         object edStimFrequency: TSESNumberBox
           Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 5
+          TabOrder = 2
           Position.X = 8.000000000000000000
           Position.Y = 24.000000000000000000
           Size.Width = 100.000000000000000000
@@ -5564,14 +5564,14 @@ object MainFrm: TMainFrm
         Size.Width = 169.000000000000000000
         Size.Height = 65.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 3
+        TabOrder = 4
         object rbNerve: TRadioButton
           Position.X = 8.000000000000000000
           Position.Y = 16.000000000000000000
           Size.Width = 125.000000000000000000
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 0
+          TabOrder = 1
           Text = 'Nerve'
         end
         object rbMuscle: TRadioButton
@@ -5580,7 +5580,7 @@ object MainFrm: TMainFrm
           Size.Width = 125.000000000000000000
           Size.Height = 33.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 1
+          TabOrder = 2
           Text = 'Muscle'
         end
       end
@@ -5593,7 +5593,7 @@ object MainFrm: TMainFrm
       Size.Height = 209.000000000000000000
       Size.PlatformDefault = False
       TabIndex = 0
-      TabOrder = 3
+      TabOrder = 4
       TabPosition = PlatformDefault
       Sizes = (
         265s
@@ -5640,6 +5640,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object Label2: TLabel
           Position.X = 16.000000000000000000
@@ -5648,6 +5649,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddAgonist: TButton
           Hint = 'Add agonist to organ bath'
@@ -5718,6 +5720,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object Label4: TLabel
           Position.X = 16.000000000000000000
@@ -5726,6 +5729,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddAntagonist: TButton
           Position.X = 16.000000000000000000
@@ -5784,6 +5788,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object cbUnknownStockConc: TComboBox
           Position.X = 144.000000000000000000
@@ -5801,6 +5806,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddUnknown: TButton
           Position.X = 16.000000000000000000
@@ -5838,14 +5844,14 @@ object MainFrm: TMainFrm
       Size.Height = 161.000000000000000000
       Size.PlatformDefault = False
       Text = 'Reservoir '
-      TabOrder = 1
+      TabOrder = 2
       object bFlushReservoirToBath: TButton
         Position.X = 16.000000000000000000
         Position.Y = 24.000000000000000000
         Size.Width = 233.000000000000000000
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 0
+        TabOrder = 1
         Text = 'Flush Reservoir To Bath'
         OnClick = bFlushReservoirToBathClick
       end
@@ -5855,7 +5861,7 @@ object MainFrm: TMainFrm
         Size.Width = 233.000000000000000000
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 1
+        TabOrder = 2
         Text = 'Clear Drugs From Res.'
         OnClick = bFreshReservoirClick
       end
@@ -5865,7 +5871,7 @@ object MainFrm: TMainFrm
         Size.Width = 233.000000000000000000
         Size.Height = 33.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 2
+        TabOrder = 3
       end
       object lbSaltSolution: TLabel
         Position.X = 16.000000000000000000
