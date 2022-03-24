@@ -5543,7 +5543,7 @@ object MainFrm: TMainFrm
         TabOrder = 3
         object edStimFrequency: TSESNumberBox
           Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 2
+          TabOrder = 1
           Position.X = 8.000000000000000000
           Position.Y = 24.000000000000000000
           Size.Width = 100.000000000000000000
@@ -5640,6 +5640,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object Label2: TLabel
           Position.X = 16.000000000000000000
@@ -5648,6 +5649,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddAgonist: TButton
           Hint = 'Add agonist to organ bath'
@@ -5718,6 +5720,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object Label4: TLabel
           Position.X = 16.000000000000000000
@@ -5726,6 +5729,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddAntagonist: TButton
           Position.X = 16.000000000000000000
@@ -5784,6 +5788,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object cbUnknownStockConc: TComboBox
           Position.X = 144.000000000000000000
@@ -5801,6 +5806,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddUnknown: TButton
           Position.X = 16.000000000000000000

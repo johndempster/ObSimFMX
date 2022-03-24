@@ -5,15 +5,6 @@
     </ProjectExtensions>
     <PropertyGroup/>
     <ItemGroup Condition="'$(Platform)'=='Win32'">
-        <DeployFile Include="SHARED.PAS" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>ObSIm\</RemoteDir>
-            <RemoteName>SHARED.PAS</RemoteName>
-            <DeployClass>ProjectFile</DeployClass>
-            <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
         <DeployFile Include="Win32\Debug\ObSIm.exe" Condition="'$(Config)'=='Debug'">
             <RemoteDir>ObSIm\</RemoteDir>
             <RemoteName>ObSIm.exe</RemoteName>
