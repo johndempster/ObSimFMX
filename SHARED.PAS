@@ -48,7 +48,7 @@ i : SmallInt ;
 begin
      CNum := ' ' ;
      for i := 1 to length(CBuf) do begin
-         if CBuf[i] in ['0'..'9', 'E', 'e', '+', '-', '.', ',' ] then
+         if CharInSet( CBuf[i], ['0'..'9', 'E', 'e', '+', '-', '.', ',' ] ) then
             CNum := CNum + CBuf[i]
          else CNum := CNum + ' ' ;
          end ;
@@ -88,7 +88,7 @@ begin
 
            { Ignore all non-numeric ansicharacters before number }
            RemoveLeadingWhiteSpace : begin
-               if CBuf[i] in ['0'..'9','E','e','+','-','.'] then State := ReadNumber
+               if CharInSet( CBuf[i], ['0'..'9','E','e','+','-','.'] ) then State := ReadNumber
                                                             else i := i + 1 ;
                end ;
 
@@ -96,7 +96,7 @@ begin
            ReadNumber : begin
                 { End copying when a non-numeric ansicharacter
                 or the end of the string is encountered }
-                if CBuf[i] in ['0'..'9','E','e','+','-','.'] then begin
+                if CharInSet( CBuf[i], ['0'..'9','E','e','+','-','.'] ) then begin
                    CNum := CNum + CBuf[i] ;
                    i := i + 1 ;
                    end
