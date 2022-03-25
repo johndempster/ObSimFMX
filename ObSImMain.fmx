@@ -127,7 +127,7 @@ object MainFrm: TMainFrm
             Touch.InteractiveGestures = [LongTap, DoubleTap]
             TabOrder = 1
             OnKeyUp = edStartTimeKeyUp
-            Position.X = 208.000000000000000000
+            Position.X = 240.000000000000000000
             Position.Y = 8.000000000000000000
             Size.Width = 100.000000000000000000
             Size.Height = 25.000000000000000000
@@ -143,9 +143,9 @@ object MainFrm: TMainFrm
             Anchors = [akLeft, akTop, akRight]
             SmallChange = 0.000000000000000000
             Orientation = Horizontal
-            Position.X = 320.000000000000000000
+            Position.X = 344.000000000000000000
             Position.Y = 8.000000000000000000
-            Size.Width = 537.000000000000000000
+            Size.Width = 513.000000000000000000
             Size.Height = 25.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 4
@@ -188,7 +188,7 @@ object MainFrm: TMainFrm
           object lbStartTime: TLabel
             Position.X = 160.000000000000000000
             Position.Y = 8.000000000000000000
-            Size.Width = 57.000000000000000000
+            Size.Width = 80.000000000000000000
             Size.Height = 17.000000000000000000
             Size.PlatformDefault = False
             Text = 'Start Time'
@@ -5568,7 +5568,7 @@ object MainFrm: TMainFrm
         object rbNerve: TRadioButton
           Position.X = 8.000000000000000000
           Position.Y = 16.000000000000000000
-          Size.Width = 125.000000000000000000
+          Size.Width = 150.000000000000000000
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 1
@@ -5577,7 +5577,7 @@ object MainFrm: TMainFrm
         object rbMuscle: TRadioButton
           Position.X = 8.000000000000000000
           Position.Y = 32.000000000000000000
-          Size.Width = 125.000000000000000000
+          Size.Width = 150.000000000000000000
           Size.Height = 33.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 2
@@ -5640,7 +5640,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
-          TabOrder = 2
         end
         object Label2: TLabel
           Position.X = 16.000000000000000000
@@ -5649,7 +5648,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
-          TabOrder = 3
         end
         object bAddAgonist: TButton
           Hint = 'Add agonist to organ bath'
@@ -5720,7 +5718,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
-          TabOrder = 2
         end
         object Label4: TLabel
           Position.X = 16.000000000000000000
@@ -5729,7 +5726,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
-          TabOrder = 3
         end
         object bAddAntagonist: TButton
           Position.X = 16.000000000000000000
@@ -5788,7 +5784,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
-          TabOrder = 2
         end
         object cbUnknownStockConc: TComboBox
           Position.X = 144.000000000000000000
@@ -5806,7 +5801,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
-          TabOrder = 3
         end
         object bAddUnknown: TButton
           Position.X = 16.000000000000000000

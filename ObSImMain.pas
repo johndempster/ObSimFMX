@@ -70,11 +70,12 @@ unit ObSImMain;
 //                   Drug B now adrenoceptor agonist which blocks  transmitter release a GP ileum which is 10X less potent than morphine
 // 111.12.19 V3.2    Rabbit Arterial Ring: List out of range error now trapped when no unknown drugs defined
 // 15.04.20  V4.0    Multi-device version on FireMonkey platform
+// 25.03.22          shared.pas removed from project file header KEY=VALUES strings in file header now saved/read using TStringLIst
 
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  System.SysUtils, System.StrUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   FMX.Controls.Presentation, FMX.StdCtrls, FMX.Edit, FMX.Ani, FMX.TabControl,
   FMX.ListBox, FMX.EditBox, FMX.NumberBox,
@@ -244,8 +245,9 @@ type
 
     procedure NewExperiment ;
     procedure SetStockConcentrationList(
-              iDrug : Integer ;
+              iDrug : NativeInt ;
               ComboBox : TComboBox ) ;
+    function GetConcentration( MenuText : string ) : Single ;
     procedure AddChartAnnotations ;
     procedure UpdateDisplay( NewPoint : Single ) ;
     procedure AddDrugMarker( ChartAnnotation : String ) ;
@@ -266,6 +268,39 @@ type
     TissueIndex : Integer ;      // Menu index of tissue type in use
 //    InitialMixing : Cardinal ;
 
+    procedure AddKeyValue( List : TStringList ;  // List for Key=Value pairs
+                           Keyword : string ;    // Key
+                           Value : single        // Value
+                           ) ; Overload ;
+
+    procedure AddKeyValue( List : TStringList ;  // List for Key=Value pairs
+                           Keyword : string ;    // Key
+                           Value : Integer        // Value
+                           ) ; Overload ;
+
+    procedure AddKeyValue( List : TStringList ;  // List for Key=Value pairs
+                           Keyword : string ;    // Key
+                           Value : String        // Value
+                           ) ; Overload ;
+
+   function GetKeyValue( List : TStringList ;  // List for Key=Value pairs
+                         KeyWord : string ;   // Key
+                         Value : single       // Value
+                         ) : Single ; Overload ;        // Return value
+
+   function GetKeyValue( List : TStringList ;  // List for Key=Value pairs
+                         KeyWord : string ;   // Key
+                         Value : Integer       // Value
+                         ) : Integer ; Overload ;        // Return value
+
+   function GetKeyValue( List : TStringList ;  // List for Key=Value pairs
+                         KeyWord : string ;   // Key
+                         Value : string       // Value
+                         ) : string ; Overload ;        // Return value
+
+  function ExtractFloat ( CBuf : string ; Default : Single ) : extended ;
+  function ExtractInt ( CBuf : string ) : longint ;
+
   end;
 
 var
@@ -277,7 +312,7 @@ uses
 {$IFDEF MSWINDOWS}
 winapi.shellapi,winapi.windows,
 {$ENDIF}
-System.Math, shared, FMX.DialogService;
+System.Math, FMX.DialogService;
 
 {$R *.fmx}
 
@@ -378,7 +413,7 @@ begin
          FileName := FileName + ParamStr(i) ;
          end ;
 
-     if System.AnsiStrings.ContainsText( ExtractFileExt(FileName),'.obs') then
+     if ContainsText( ExtractFileExt(FileName),'.obs') then
         begin
         if FileExists(FileName) then LoadFromFile( FileName ) ;
         end ;
@@ -417,17 +452,17 @@ begin
     TissueIndex := cbTissueType.ItemIndex ;
 
     // Initialise model
-    Model.InitialiseModel( Integer(cbTissueType.Items.Objects[cbTissueType.ItemIndex])) ;
+    Model.InitialiseModel( NativeInt(cbTissueType.Items.Objects[cbTissueType.ItemIndex])) ;
 
      // Configure experiment options
      Case Model.ModelType of
         tGPIleum : begin
-           rbNerve.Text := 'Nerve (10V, 1ms)' ;
+           rbNerve.Text := 'Nerve (10V,1ms)' ;
            rbNerve.IsChecked := True ;
            rbNerve.Enabled := True ;
            JejunumStimGrp.Visible := False ;
            StimulationTypeGrp.Visible := True ;
-           rbMuscle.Text := 'Muscle (20V, 10ms)' ;
+           rbMuscle.Text := 'Muscle (20V,10ms)' ;
            rbMuscle.IsChecked := False ;
            rbMuscle.Enabled := True ;
            GPIleumSetup.Visible := True ;
@@ -490,7 +525,7 @@ begin
         begin
         cbAgonist.ItemIndex := 0 ;
         // Set up stock soln. concentration list
-        SetStockConcentrationList( Integer(cbAgonist.Items.Objects[cbAgonist.ItemIndex]),cbAgonistStockConc ) ;
+        SetStockConcentrationList( NativeInt(cbAgonist.Items.Objects[cbAgonist.ItemIndex]),cbAgonistStockConc ) ;
         end ;
 
      // Create list of agonists
@@ -499,7 +534,7 @@ begin
      if cbAntagonist.Items.Count > 0 then
         begin
         cbAntagonist.ItemIndex := 0 ;
-        SetStockConcentrationList( Integer(cbAntagonist.Items.Objects[cbAntagonist.ItemIndex]),cbAntagonistStockConc ) ;
+        SetStockConcentrationList( NativeInt(cbAntagonist.Items.Objects[cbAntagonist.ItemIndex]),cbAntagonistStockConc ) ;
         end ;
 
      // Create list of unknown drugs
@@ -508,7 +543,7 @@ begin
      if cbUnknown.Items.Count > 0 then
         begin
         cbUnknown.ItemIndex := 0 ;
-        SetStockConcentrationList( Integer(cbUnknown.Items.Objects[cbAntagonist.ItemIndex]),cbUnknownStockConc ) ;
+        SetStockConcentrationList( NativeInt(cbUnknown.Items.Objects[cbAntagonist.ItemIndex]),cbUnknownStockConc ) ;
         end ;
 
      { Clear buffer  }
@@ -640,7 +675,7 @@ begin
 
 
 procedure TMainFrm.SetStockConcentrationList(
-          iDrug : Integer ;
+          iDrug : NativeInt ;
           ComboBox : TComboBox ) ;
 // ------------------------------------------
 // Set list of available stock concentrations
@@ -655,10 +690,8 @@ begin
         begin
         // Set up stock soln. concentration lists
         ComboBox.Clear ;
-        x := 1.0 ;
-        ComboBox.Items.AddObject('1/1 dilution',TObject(x));
-        x := 0.1 ;
-        ComboBox.Items.AddObject('1/10 dilution',TObject(x));
+        ComboBox.Items.Add('1/1 dilution');
+        ComboBox.Items.Add('1/10 dilution');
         ComboBox.ItemIndex := 0 ;
         end
      else if Model.Drugs[iDrug].Units = 'mg/ml' then
@@ -668,7 +701,7 @@ begin
         x := 10000.0 ;
         for i := 4 Downto -3 do
             begin
-            ComboBox.Items.AddObject( format( '1E%d mg/ml',[i]), TObject(x) ) ;
+            ComboBox.Items.Add( format( '1E%d mg/ml',[i])) ;
             x := x/10.0 ;
             end ;
         ComboBox.ItemIndex := 3 ;
@@ -680,7 +713,7 @@ begin
          x := 1.0 ;
          for i := 0 Downto -8 do
             begin
-            ComboBox.Items.AddObject( format( '1E%d M',[i]), TObject(x) ) ;
+            ComboBox.Items.Add( format( '1E%d M',[i]) ) ;
             x := x/10.0 ;
             end ;
          ComboBox.ItemIndex := 3 ;
@@ -695,6 +728,40 @@ begin
          end ;
 
      end;
+
+
+function TMainFrm.GetConcentration( MenuText : string ) : Single ;
+// -----------------------------------------------
+// Return concentration from stock soln. menu text
+// -----------------------------------------------
+begin
+
+     if ContainsText( MenuText, 'ml') then
+       begin
+       // Dilutions
+       if ContainsText( MenuText, '1/1' ) then Result := 1.0
+       else if ContainsText( MenuText, '1/10' ) then Result := 0.1
+       else if ContainsText( MenuText, '1/100' ) then Result := 0.01
+       else Result := ExtractFloat( MenuText, 1.0 ) ;
+       end
+    else if ContainsText( MenuText, 'mM') then
+       begin
+       // mM concentrations
+       Result := ExtractFloat( MenuText, 1.0 )*1E-3 ;
+       end
+    else if ContainsText( MenuText, 'uM') then
+       begin
+       // Micromolar concentrations
+       Result := ExtractFloat( MenuText, 1.0 )*1E-6 ;
+       end
+    else
+       begin
+       // Molar concentrations
+       Result := ExtractFloat( MenuText, 1.0 ) ;
+       end
+
+end;
+
 
 
 procedure TMainFrm.TimerTimer(Sender: TObject);
@@ -715,7 +782,6 @@ begin
              tChickBiventer : Model.DoChickBiventerSimulationStep ;
              tArterialRing : Model.DoArterialRingSimulationStep ;
              tJejunum : Model.DoJejunumSimulationStep ;
-             else NewPoint := 0.0 ;
              end ;
         NewPoint := Model.ChanValues[0] ;
         UpdateDisplay( NewPoint ) ;
@@ -755,14 +821,15 @@ begin
         end ;
      end ;
 
+
 procedure TMainFrm.bAddAgonistClick(Sender: TObject);
 // --------------------------------------------
 // Add volume of agonist stock solution to bath
 // --------------------------------------------
 var
-     StockConcentration : Double ;
-     AddedConcentration : Double ;
-     iDrug : Integer ;
+     StockConcentration : Single ;
+     AddedConcentration : Single ;
+     iDrug : NativeInt ;
      ChartAnnotation : String ;
 begin
 
@@ -773,8 +840,8 @@ begin
         end ;
 
      // Add drug
-     iDrug := Integer(cbAgonist.Items.Objects[cbAgonist.ItemIndex]) ;
-     StockConcentration := Double( cbAgonistStockConc.Items.Objects[cbAgonistStockConc.ItemIndex]) ;
+     iDrug := NativeInt(cbAgonist.Items.Objects[cbAgonist.ItemIndex]) ;
+     StockConcentration := GetConcentration( cbAgonistStockConc.Items[cbAgonistStockConc.ItemIndex]) ;
 
      // Calculate change in final bath concentration
      AddedConcentration :=  (StockConcentration*edAgonistVolume.Value) / Model.BathVolume ;
@@ -807,7 +874,7 @@ procedure TMainFrm.bAddAntagonistClick(Sender: TObject);
 var
      StockConcentration : Double ;
      AddedConcentration : Double ;
-     iDrug : Integer ;
+     iDrug : NativeInt ;
      ChartAnnotation : String ;
 begin
 
@@ -818,8 +885,8 @@ begin
         end ;
 
      // Add drug
-     iDrug := Integer(cbAntagonist.Items.Objects[cbAntagonist.ItemIndex]) ;
-     StockConcentration := Double( cbAntagonistStockConc.Items.Objects[cbAntagonistStockConc.ItemIndex]) ;
+     iDrug :=NativeInt(cbAntagonist.Items.Objects[cbAntagonist.ItemIndex]) ;
+     StockConcentration := GetConcentration( cbAntagonistStockConc.Items[cbAntagonistStockConc.ItemIndex]) ;
 
      // Calculate change in final bath concentration
      AddedConcentration :=  (StockConcentration*edAntagonistVolume.Value) / Model.BathVolume ;
@@ -850,9 +917,9 @@ procedure TMainFrm.bAddUnknownClick(Sender: TObject);
 // Add volume of unknown drug stock solution to bath
 // -------------------------------------------------
 var
-     StockConcentration : Double ;
-     AddedConcentration : Double ;
-     iDrug : Integer ;
+     StockConcentration : Single ;
+     AddedConcentration : Single ;
+     iDrug : NativeInt ;
      ChartAnnotation : String ;
 begin
 
@@ -863,8 +930,8 @@ begin
         end ;
 
      // Add drug
-     iDrug := Integer(cbUnknown.Items.Objects[cbUnknown.ItemIndex]) ;
-     StockConcentration := Double( cbUnknownStockConc.Items.Objects[cbUnknownStockConc.ItemIndex]) ;
+     iDrug := NativeInt(cbUnknown.Items.Objects[cbUnknown.ItemIndex]) ;
+     StockConcentration := GetConcentration( cbUnknownStockConc.Items[cbUnknownStockConc.ItemIndex]) ;
 
      // Calculate change in final bath concentration
      AddedConcentration :=  (StockConcentration*edUnknownVolume.Value) / Model.BathVolume ;
@@ -1200,54 +1267,68 @@ procedure TMainFrm.SaveToFile(
 // Save chart recording to file
 // ----------------------------
 var
-   Header : array[1..FileHeaderSize] of ansichar ;
+   ANSIHeaderBuf : array[0..FileHeaderSize] of ansichar ;
+   Header : TStringList ;
    i : Integer ;
    FileHandle : THandle ;
 begin
 
+     // Create file header Name=Value string list
+     Header := TStringList.Create ;
+
      FileHandle := FileCreate( FileName ) ;
      if Integer(FileHandle) < 0 then Exit ;
 
-     { Initialise empty header buffer with zero bytes }
-     for i := 1 to sizeof(Header) do Header[i] := #0 ;
+     AddKeyValue( Header, 'NPOINTS', NumPointsInBuf ) ;
+     AddKeyValue( Header, 'TISTYPE', Model.ModelType ) ;
 
-
-     AppendInt( Header, 'NPOINTS=', NumPointsInBuf ) ;
-     AppendInt( Header, 'TISTYPE=', Model.ModelType ) ;
-
-     AppendFloat( Header, 'NEXTRMAX=', Model.NextRMax ) ;
+     AddKeyValue( Header, 'NEXTRMAX', Model.NextRMax ) ;
 
      // Save drug EC50 settings
      for i := 0 to Model.NumDrugs-1 do
           begin
-          AppendFloat( Header, format('DRG%d_HIST=',[i]), Model.Drugs[i].EC50_HistR ) ;
-          AppendFloat( Header, format('DRG%dEC50_HISTNC=',[i]),Model.Drugs[i].EC50_HistR_NC);
-          AppendFloat( Header, format('DRG%d_N_ACH=',[i]), Model.Drugs[i].EC50_nAchR ) ;
-          AppendFloat( Header, format('DRG%d_M_ACH=',[i]), Model.Drugs[i].EC50_mAchR ) ;
-          AppendFloat( Header, format('DRG%dEC50_M_ACHNC=',[i]),Model.Drugs[i].EC50_mAchR_NC);
-          AppendFloat( Header, format('DRG%d_OP=',[i]), Model.Drugs[i].EC50_OpR ) ;
-          AppendFloat( Header, format('DRG%d_A_ADR=',[i]), Model.Drugs[i].EC50_Alpha_AdrenR  ) ;
-          AppendFloat( Header, format('DRG%d_B_ADR=',[i]), Model.Drugs[i].EC50_Beta_AdrenR ) ;
-          AppendFloat( Header, format('DRG%d_PLC=',[i]), Model.Drugs[i].EC50_PLC_Inhibition ) ;
-          AppendFloat( Header, format('DRG%d_IPS=',[i]), Model.Drugs[i].EC50_IP3R ) ;
-//          AppendFloat( Header, format('DRG%d_CAI=',[i]), Model.Drugs[i].EC50_CaI ) ;
-          AppendFloat( Header, format('DRG%d_CAS=',[i]), Model.Drugs[i].EC50_CaStore ) ;
-          AppendFloat( Header, format('DRG%d_CAV=',[i]), Model.Drugs[i].EC50_CaChannelV ) ;
-          AppendFloat( Header, format('DRG%d_CAR=',[i]), Model.Drugs[i].EC50_CaChannelR ) ;
+          AddKeyValue( Header, format('DRG%d_HIST',[i]), Model.Drugs[i].EC50_HistR ) ;
+          AddKeyValue( Header, format('DRG%dEC50_HISTNC',[i]),Model.Drugs[i].EC50_HistR_NC);
+          AddKeyValue( Header, format('DRG%d_N_ACH',[i]), Model.Drugs[i].EC50_nAchR ) ;
+          AddKeyValue( Header, format('DRG%d_M_ACH',[i]), Model.Drugs[i].EC50_mAchR ) ;
+          AddKeyValue( Header, format('DRG%dEC50_M_ACHNC',[i]),Model.Drugs[i].EC50_mAchR_NC);
+          AddKeyValue( Header, format('DRG%d_OP',[i]), Model.Drugs[i].EC50_OpR ) ;
+          AddKeyValue( Header, format('DRG%d_A_ADR',[i]), Model.Drugs[i].EC50_Alpha_AdrenR  ) ;
+          AddKeyValue( Header, format('DRG%d_B_ADR',[i]), Model.Drugs[i].EC50_Beta_AdrenR ) ;
+          AddKeyValue( Header, format('DRG%d_PLC',[i]), Model.Drugs[i].EC50_PLC_Inhibition ) ;
+          AddKeyValue( Header, format('DRG%d_IPS',[i]), Model.Drugs[i].EC50_IP3R ) ;
+//          AppendFloat( Header, format('DRG%d_CAI',[i]), Model.Drugs[i].EC50_CaI ) ;
+          AddKeyValue( Header, format('DRG%d_CAS',[i]), Model.Drugs[i].EC50_CaStore ) ;
+          AddKeyValue( Header, format('DRG%d_CAV',[i]), Model.Drugs[i].EC50_CaChannelV ) ;
+          AddKeyValue( Header, format('DRG%d_CAR',[i]), Model.Drugs[i].EC50_CaChannelR ) ;
           end ;
 
-     AppendInt( Header, 'NMARKERS=', MarkerList.Count ) ;
+     AddKeyValue( Header, 'NMARKERS', MarkerList.Count ) ;
      for i := 0 to MarkerList.Count-1 do begin
-         AppendInt( Header, format('MKP%d=',[i]), Integer(MarkerList.Objects[i])) ;
-         AppendString( Header, format('MKT%d=',[i]), MarkerList.Strings[i] ) ;
+         AddKeyValue( Header, format('MKP%d',[i]), Integer(MarkerList.Objects[i])) ;
+         AddKeyValue( Header, format('MKT%d',[i]), MarkerList[i] ) ;
          end ;
 
-     // Write header
-     FileWrite( FileHandle, Header, SizeOf(Header)) ;
+     // Get ANSIstring copy of header text adn write to file
+//     AnsiHeader := AnsiString(Header.Text) ;
+     for i := 0 to Length(Header.Text)-1 do
+         begin
+         AnsiHeaderBuf[i] := ANSIChar(Header.Text[i+1]);
+         end;
+     AnsiHeaderBuf[Length(Header.Text)] := #0 ;
+
+//     pAnsiHeader :=  Addr(AnsiHeader[1]);
+     FileWrite( FileHandle, AnsiHeaderBuf, Length(Header.Text)) ;
+
      // Write chart data
+
+     FileSeek( FileHandle, FileHeaderSize, 0 ) ;
      FileWrite( FileHandle, ADC, NumPointsInBuf*2 ) ;
      // Close file
      FileClose( FileHandle ) ;
+
+     // Free header
+     Header.Free ;
 
      UnSavedData := False ;
      end ;
@@ -1271,61 +1352,65 @@ procedure TMainFrm.LoadFromFile(
 // Load chart recording from file
 // ----------------------------
 var
-   Header : array[1..FileHeaderSize] of ansichar ;
+   AnsiHeaderBuf : Array[0..FileHeaderSize] of ANSIChar ;
+   AnsiHeader : ANSIString ;
+   Header : TStringList ;
    i : Integer ;
-   FileHandle : Integer ;
+   FileHandle : THandle ;
    NumMarkers : Integer ;
    MarkerPoint : Integer ;
    MarkerText : String ;
    DataStart : Integer ;
 begin
 
+     // Create file header Name=Value string list
+     Header := TStringList.Create ;
+
      NumPointsInBuf := 0 ;
 
      FileHandle := FileOpen( FileName, fmOpenRead ) ;
-     if FileHandle < 0 then Exit ;
+     if NativeInt(FileHandle) < 0 then Exit ;
 
      FileSeek( FileHandle, 0, 0 ) ;
 
-     // Clear header
-     for i := 1 to High(Header) do Header[i] := #0 ;
-
      // Read header
-     FileRead(FileHandle, Header, Sizeof(Header)) ;
+     FileRead(FileHandle, ANSIHeaderBuf, FileHeaderSize ) ;
+     ANSIHeader := ANSIString( ANSIHeaderBuf ) ;
+     Header.Text := String(ANSIHeader) ;
 
      // Get tissue type
-     ReadInt( Header, 'TISTYPE=', Model.ModelType ) ;
+     Model.ModelType := GetKeyValue( Header, 'TISTYPE', Model.ModelType ) ;
 
      NumPointsInBuf := 0 ;
-     ReadInt( Header, 'NPOINTS=', NumPointsInBuf ) ;
+     NumPointsInBuf := GetKeyValue( Header, 'NPOINTS', NumPointsInBuf ) ;
 
-     ReadFloat( Header, 'NEXTRMAX=', Model.NextRMax ) ;
+     Model.NextRMax := GetKeyValue( Header, 'NEXTRMAX', Model.NextRMax ) ;
 
      // Read drug EC50 settings
      for i := 0 to Model.NumDrugs-1 do
           begin
-          ReadFloat( Header, format('DRG%d_HIST=',[i]), Model.Drugs[i].EC50_HistR ) ;
-          AppendFloat( Header, format('DRG%dEC50_HISTNC=',[i]),Model.Drugs[i].EC50_HistR_NC);
-          ReadFloat( Header, format('DRG%d_N_ACH=',[i]), Model.Drugs[i].EC50_nAchR ) ;
-          ReadFloat( Header, format('DRG%d_M_ACH=',[i]), Model.Drugs[i].EC50_mAchR ) ;
-          ReadFloat( Header, format('DRG%d_OP=',[i]), Model.Drugs[i].EC50_OpR ) ;
-          ReadFloat( Header, format('DRG%d_A_ADR=',[i]), Model.Drugs[i].EC50_Alpha_AdrenR  ) ;
-          ReadFloat( Header, format('DRG%d_B_ADR=',[i]), Model.Drugs[i].EC50_Beta_AdrenR ) ;
-          ReadFloat( Header, format('DRG%d_PLC=',[i]), Model.Drugs[i].EC50_PLC_Inhibition ) ;
-          ReadFloat( Header, format('DRG%d_IPS=',[i]), Model.Drugs[i].EC50_IP3R ) ;
-          ReadFloat( Header, format('DRG%d_CAS=',[i]), Model.Drugs[i].EC50_CaStore ) ;
-          ReadFloat( Header, format('DRG%d_CAV=',[i]), Model.Drugs[i].EC50_CaChannelV ) ;
-          ReadFloat( Header, format('DRG%d_CAR=',[i]), Model.Drugs[i].EC50_CaChannelR ) ;
+          Model.Drugs[i].EC50_HistR := GetKeyValue( Header, format('DRG%d_HIST',[i]), Model.Drugs[i].EC50_HistR ) ;
+          Model.Drugs[i].EC50_HistR_NC := GetKeyValue( Header, format('DRG%dEC50_HISTNC',[i]),Model.Drugs[i].EC50_HistR_NC);
+          Model.Drugs[i].EC50_nAchR := GetKeyValue( Header, format('DRG%d_N_ACH',[i]), Model.Drugs[i].EC50_nAchR ) ;
+          Model.Drugs[i].EC50_mAchR := GetKeyValue( Header, format('DRG%d_M_ACH',[i]), Model.Drugs[i].EC50_mAchR ) ;
+          Model.Drugs[i].EC50_Alpha_AdrenR := GetKeyValue( Header, format('DRG%d_OP',[i]), Model.Drugs[i].EC50_OpR ) ;
+          Model.Drugs[i].EC50_Alpha_AdrenR := GetKeyValue( Header, format('DRG%d_A_ADR',[i]), Model.Drugs[i].EC50_Alpha_AdrenR  ) ;
+          Model.Drugs[i].EC50_Beta_AdrenR := GetKeyValue( Header, format('DRG%d_B_ADR',[i]), Model.Drugs[i].EC50_Beta_AdrenR ) ;
+          Model.Drugs[i].EC50_PLC_Inhibition := GetKeyValue( Header, format('DRG%d_PLC',[i]), Model.Drugs[i].EC50_PLC_Inhibition ) ;
+          Model.Drugs[i].EC50_IP3R := GetKeyValue( Header, format('DRG%d_IPS',[i]), Model.Drugs[i].EC50_IP3R ) ;
+          Model.Drugs[i].EC50_CaStore := GetKeyValue( Header, format('DRG%d_CAS',[i]), Model.Drugs[i].EC50_CaStore ) ;
+          Model.Drugs[i].EC50_CaChannelV := GetKeyValue( Header, format('DRG%d_CAV',[i]), Model.Drugs[i].EC50_CaChannelV ) ;
+          Model.Drugs[i].EC50_CaChannelR := GetKeyValue( Header, format('DRG%d_CAR',[i]), Model.Drugs[i].EC50_CaChannelR ) ;
           end ;
 
-     ReadInt( Header, 'NMARKERS=', NumMarkers ) ;
+     NumMarkers := GetKeyValue( Header, 'NMARKERS', NumMarkers ) ;
      MarkerList.Clear ;
      for i := 0 to NumMarkers-1 do
          begin
-         ReadInt( Header, format('MKPOINT%d=',[i]), MarkerPoint) ;
-         ReadInt( Header, format('MKP%d=',[i]), MarkerPoint) ;
-         ReadString( Header, format('MKTEXT%d=',[i]), MarkerText ) ;
-         ReadString( Header, format('MKT%d=',[i]), MarkerText ) ;
+         MarkerPoint := GetKeyValue( Header, format('MKPOINT%d',[i]), MarkerPoint) ;
+         MarkerPoint := GetKeyValue( Header, format('MKP%d',[i]), MarkerPoint) ;
+         MarkerText := GetKeyValue( Header, format('MKTEXT%d',[i]), MarkerText ) ;
+         MarkerText := GetKeyValue( Header, format('MKT%d',[i]), MarkerText ) ;
          MarkerList.AddObject( MarkerText, TObject(MarkerPoint)) ;
          end ;
 
@@ -1338,6 +1423,8 @@ begin
 
      // Close data file
      FileClose( FileHandle ) ;
+
+     Header.Free ;
 
      UnsavedData := False ;
      scDisplay.XOffset := -1 ;
@@ -1527,6 +1614,199 @@ begin
           end;
 
     end;
+end ;
+
+
+procedure TMainFrm.AddKeyValue( List : TStringList ;  // List for Key=Value pairs
+                                KeyWord : string ;    // Key
+                                Value : single        // Value
+                                 ) ;
+// ---------------------
+// Add Key=Single Value to List
+// ---------------------
+begin
+     List.Add( Keyword + format('=%.4g',[Value]) ) ;
 end;
+
+
+procedure TMainFrm.AddKeyValue( List : TStringList ;  // List for Key=Value pairs
+                                KeyWord : string ;    // Key
+                                Value : Integer        // Value
+                                 ) ;
+// ---------------------
+// Add Key=Integer Value to List
+// ---------------------
+begin
+     List.Add( Keyword + format('=%d',[Value]) ) ;
+end;
+
+procedure TMainFrm.AddKeyValue( List : TStringList ;  // List for Key=Value pairs
+                                KeyWord : string ;    // Key
+                                Value : string        // Value
+                                 ) ;
+// ---------------------
+// Add Key=string Value to List
+// ---------------------
+begin
+     List.Add( Keyword + '=' + Value ) ;
+end;
+
+
+function TMainFrm.GetKeyValue( List : TStringList ;  // List for Key=Value pairs
+                               KeyWord : string ;   // Key
+                               Value : single       // Value
+                               ) : Single ;         // Return value
+// ------------------------------
+// Get Key=Single Value from List
+// ------------------------------
+var
+    istart,idx : Integer ;
+    s : string ;
+begin
+
+     idx := List.IndexOfName( Keyword ) ;
+     if idx >= 0 then
+        begin
+        s := List[idx] ;
+        // Find key=value separator and remove key
+        istart := Pos( '=', s ) ;
+        if istart > 0 then Delete( s, 1, istart ) ;
+        Result := ExtractFloat( s, Value ) ;
+        end
+     else Result := Value ;
+
+end;
+
+
+function TMainFrm.GetKeyValue( List : TStringList ;  // List for Key=Value pairs
+                               KeyWord : string ;   // Key
+                               Value : Integer       // Value
+                               ) : Integer ;        // Return value
+// ------------------------------
+// Get Key=Integer Value from List
+// ------------------------------
+var
+    istart,idx : Integer ;
+    s : string ;
+begin
+
+     idx := List.IndexOfName( Keyword ) ;
+     if idx >= 0 then
+        begin
+        s := List[idx] ;
+        // Find key=value separator and remove key
+        istart := Pos( '=', s ) ;
+        if istart > 0 then Delete( s, 1, istart ) ;
+        Result := STrToInt( s ) ;
+        end
+     else Result := Value ;
+
+end;
+
+
+function TMainFrm.GetKeyValue( List : TStringList ;  // List for Key=Value pairs
+                               KeyWord : string ;   // Key
+                               Value : string       // Value
+                               ) : string ;        // Return value
+// ------------------------------
+// Get Key=Integer Value from List
+// ------------------------------
+var
+    istart,idx : Integer ;
+    s : string ;
+begin
+
+      idx := List.IndexOfName( Keyword ) ;
+     if idx >= 0 then
+        begin
+        s := List[idx] ;
+        // Find key=value separator and remove key
+        istart := Pos( '=', s ) ;
+        if istart > 0 then Delete( s, 1, istart ) ;
+        Result := s ;
+        end
+     else Result := Value ;
+
+end;
+
+
+function TMainFrm.ExtractFloat ( CBuf : string ; Default : Single ) : extended ;
+{ Extract a floating point number from a string which
+  may contain additional non-numeric text }
+
+var CNum : string ;
+i : SmallInt ;
+
+begin
+     CNum := ' ' ;
+     for i := 1 to length(CBuf) do begin
+         if CharInSet( CBuf[i], ['0'..'9', 'E', 'e', '+', '-', '.', ',' ] ) then
+            CNum := CNum + CBuf[i]
+         else CNum := CNum + ' ' ;
+         end ;
+
+     { Correct for use of comma/period as decimal separator }
+     if (formatsettings.DECIMALSEPARATOR = '.') and (Pos(',',CNum) <> 0) then
+        CNum[Pos(',',CNum)] := formatsettings.DECIMALSEPARATOR ;
+     if (formatsettings.DECIMALSEPARATOR = ',') and (Pos('.',CNum) <> 0) then
+        CNum[Pos('.',CNum)] := formatsettings.DECIMALSEPARATOR ;
+
+     try
+        ExtractFloat := StrToFloat( CNum ) ;
+     except
+        on E : EConvertError do ExtractFloat := Default ;
+        end ;
+     end ;
+
+function TMainFrm.ExtractInt ( CBuf : string ) : longint ;
+{ Extract a 32 bit integer number from a string which
+  may contain additional non-numeric text }
+Type
+    TState = (RemoveLeadingWhiteSpace, ReadNumber) ;
+var
+   CNum : string ;
+   i : integer ;
+   Quit : Boolean ;
+   State : TState ;
+
+begin
+     CNum := '' ;
+     i := 1;
+     Quit := False ;
+     State := RemoveLeadingWhiteSpace ;
+     while not Quit do begin
+
+           case State of
+
+           { Ignore all non-numeric ansicharacters before number }
+           RemoveLeadingWhiteSpace : begin
+               if CharInSet( CBuf[i], ['0'..'9','E','e','+','-','.'] ) then State := ReadNumber
+                                                            else i := i + 1 ;
+               end ;
+
+           { Copy number into string CNum }
+           ReadNumber : begin
+                { End copying when a non-numeric ansicharacter
+                or the end of the string is encountered }
+                if CharInSet( CBuf[i], ['0'..'9','E','e','+','-','.'] ) then begin
+                   CNum := CNum + CBuf[i] ;
+                   i := i + 1 ;
+                   end
+                else Quit := True ;
+                end ;
+           else end ;
+
+           if i > Length(CBuf) then Quit := True ;
+           end ;
+     try
+        ExtractInt := StrToInt( CNum ) ;
+     except
+        ExtractInt := 1 ;
+        end ;
+     end ;
+
+
+
+
 
 end.

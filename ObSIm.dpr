@@ -4,7 +4,6 @@ uses
   System.StartUpCopy,
   FMX.Forms,
   ObSImMain in 'ObSImMain.pas' {MainFrm},
-  SHARED in 'SHARED.PAS',
   ObSImModel in 'ObSImModel.pas' {Model: TDataModule};
 
 {$R *.res}

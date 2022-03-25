@@ -87,7 +87,7 @@ type
 
   public
     { Public declarations }
-    ModelType : Integer ;                               // Type of model in use
+    ModelType : NativeInt ;                               // Type of model in use
 
     t : single ;                                        // Elapsed time since start of simulation
     tStimulus : single ;                                // Time of stimulus (s)
@@ -120,7 +120,7 @@ type
 
     procedure GetListOfModels( Models : TStrings ) ;
     procedure InitialiseModel( NewModelType : Integer ) ;
-    function DoSimulationStep : single ;
+    procedure DoSimulationStep ;
     procedure DoGPIleumSimulationStep( CyclicNerveReleasedAch : single ) ;
     procedure DoJejunumSimulationStep ;
     procedure DoArterialRingSimulationStep ;
@@ -696,7 +696,7 @@ begin
 
 end;
 
-function TModel.DoSimulationStep : single ;
+procedure TModel.DoSimulationStep  ;
 begin
     case ModelType of
         tGPIleum : DoGPIleumSimulationStep( CyclicNerveReleasedAch ) ;
