@@ -71,6 +71,7 @@ unit ObSImMain;
 // 111.12.19 V3.2    Rabbit Arterial Ring: List out of range error now trapped when no unknown drugs defined
 // 15.04.20  V4.0    Multi-device version on FireMonkey platform
 // 25.03.22          shared.pas removed from project file header KEY=VALUES strings in file header now saved/read using TStringLIst
+// 06.04.22          User dialogs now use ModalBoxFrm
 
 interface
 
@@ -116,7 +117,7 @@ type
     TissueGrp: TGroupBox;
     bNewExperiment: TButton;
     StimulusGrp: TGroupBox;
-    TabControl2: TTabControl;
+    DrugsTab: TTabControl;
     AgonistTab: TTabItem;
     AntagonistTab: TTabItem;
     UnknownTab: TTabItem;
@@ -226,6 +227,7 @@ type
     procedure bTDisplayDoubleClick(Sender: TObject);
     procedure edStartTimeKeyUp(Sender: TObject; var Key: Word;
       var KeyChar: Char; Shift: TShiftState);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 
   private
     { Private declarations }
@@ -255,7 +257,6 @@ type
     procedure SaveToFile( FileName : String ) ;
     procedure StopSimulation ;
     procedure UpdateDisplayDuration ;
-    function DataOverwriteCheck( Msg : String ) : Boolean ;
     procedure SetDilutionEquation ;
 
     procedure SetComboBoxFontSize(
@@ -322,7 +323,7 @@ uses
 {$IFDEF MSWINDOWS}
 winapi.shellapi,winapi.windows,
 {$ENDIF}
-System.Math, FMX.DialogService;
+System.Math, FMX.DialogService, ModalBox ;
 
 {$R *.fmx}
 
@@ -332,6 +333,21 @@ const
     NoiseStDev = 10 ;
     MaxDisplayForce = 20.0 ;
 
+
+
+procedure TMainFrm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+// -------------------------------------------
+// Check with user if program should be closed
+// -------------------------------------------
+begin
+    if not UnSavedData then CanClose := True
+    else
+        begin
+        ModalBoxFrm.MessageText := 'Experiment not saved: Are you sure you want to close the program' ;
+        if ModalBoxFrm.ShowModal = mrYes then CanClose := True
+                                         else CanClose := False ;
+        end;
+end;
 
 
 procedure TMainFrm.FormShow(Sender: TObject);
@@ -528,7 +544,7 @@ begin
 
 
      // Create list of agonists
-     Model.GetListOfDrugs( cbAgonist.Items, 'Agonist' ) ;
+     Model.GetListOfDrugs( cbAgonist.Items, dtAgonist ) ;
      SetComboBoxFontSize( cbAgonist, 13 ) ;
 
      if cbAgonist.Items.Count > 0 then
@@ -539,7 +555,7 @@ begin
         end ;
 
      // Create list of agonists
-     Model.GetListOfDrugs( cbAntagonist.Items, 'Antagonist' ) ;
+     Model.GetListOfDrugs( cbAntagonist.Items, dtAntagonist ) ;
      SetComboBoxFontSize( cbAntagonist, 13 ) ;
      if cbAntagonist.Items.Count > 0 then
         begin
@@ -548,7 +564,7 @@ begin
         end ;
 
      // Create list of unknown drugs
-     Model.GetListOfDrugs( cbUnknown.Items, 'Unknown' ) ;
+     Model.GetListOfDrugs( cbUnknown.Items, dtUnknown ) ;
      SetComboBoxFontSize( cbUnknown, 13 ) ;
      if cbUnknown.Items.Count > 0 then
         begin
@@ -1122,8 +1138,6 @@ begin
      bStimulationOn.Enabled := False ;
      bStimulationOff.Enabled := True ;
 
-     Model.tNextStimulus := Model.t ;
-
      // Add chart annotation
      if Model.ModelType = tJejunum then
         begin
@@ -1135,17 +1149,21 @@ begin
         begin
         if rbNerve.IsChecked then
            begin
-           Model.NerveStimulationOn := True ;
-           Model.MuscleStimulationOn := False ;
+           // Start nerve stimulation
+           Model.MuscleStimulation := False ;
+           Model.NerveStimulation := True ;
            AddDrugMarker( 'Stim(nv.):On' )
            end
         else
            begin
-           Model.NerveStimulationOn := True ;
-           Model.MuscleStimulationOn := False ;
+           // Start muscle stimulation
+           Model.NerveStimulation := False ;
+           Model.MuscleStimulation := True ;
            AddDrugMarker( 'Stim(mu.):On' ) ;
            end;
-        end
+        end ;
+
+     StimulationTypeGrp.Enabled := False ;
 
      end;
 
@@ -1207,12 +1225,14 @@ var
 begin
      bStimulationOn.Enabled := True ;
      bStimulationOff.Enabled := False ;
+     StimulationTypeGrp.Enabled := True ;
+
      // Add chart annotation
      ChartAnnotation := 'Stim:Off' ;
      AddDrugMarker( ChartAnnotation ) ;
 
-     Model.NerveStimulationOn := False ;
-     Model.MuscleStimulationOn := False ;
+     Model.NerveStimulation := False ;
+     Model.MuscleStimulation := False ;
 
      end;
 
@@ -1221,31 +1241,15 @@ procedure TMainFrm.bNewExperimentClick(Sender: TObject);
 // ---------------------
 // Select new experiment
 // ---------------------
-var
-    OK : Boolean ;
 begin
 
-     if UnSavedData then
+     if not UnSavedData then NewExperiment
+     else
         begin
-        TDialogService.PreferredMode := TDialogService.TPreferredMode.Platform ;
-        TDialogService.MessageDialog(
-        'New experiment: Existing data will be erased! Are you sure?',
-        TMsgDlgType.mtConfirmation,
-        [TMsgDlgBtn.mbYes,TMsgDlgBtn.mbNo],TMsgDlgBtn.mbNo,0,
-        procedure(const AResult: TModalResult)
-          begin
-          if AResult = mrYes then OK := True
-                             else OK := False ;
-          end
-          );
-        end
-     else OK := True ;
-     if OK then
-        begin
-        // Initialise experiment
-
-        NewExperiment ;
+        ModalBoxFrm.MessageText := 'Experiment not saved: Are you sure you want to erase it?' ;
+        if ModalBoxFrm.ShowModal = mrYes then NewExperiment ;
         end;
+
      end;
 
 
@@ -1345,14 +1349,30 @@ begin
 
 
 procedure TMainFrm.scDisplayClick(Sender: TObject);
+// -------------------------------
+// Mouse button clicked on display
+// -------------------------------
 begin
-scDisplay.Repaint ;
+//
+//     scDisplay.Repaint ;
+
 end;
 
 procedure TMainFrm.scDisplayMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Single);
+var
+    ch : Integer ;
 begin
-scDisplay.Repaint ;
+
+     // Ensure that lower limit of display kept less than -10% of max.
+     for ch := 0 to scDisplay.NumChannels-1 do
+         if scDisplay.YMin[ch] < (MinADCValue div 10) then
+            begin
+            scDisplay.YMin[ch] := MinADCValue div 10 ;
+            end;
+
+     scDisplay.Repaint ;
+
 end;
 
 procedure TMainFrm.LoadFromFile(
@@ -1495,12 +1515,21 @@ procedure TMainFrm.mnLoadExperimentClick(Sender: TObject);
 // -------------------------
 // Load experiment from file
 // -------------------------
+var
+    OK : Boolean ;
 begin
 
-     if DataOverwriteCheck('Load experiment: Existing data will be erased! Are you sure?') then
+     OK := False ;
+     if UnSavedData then
+        begin
+        ModalBoxFrm.MessageText := 'Experiment not saved: Are you sure you want to erase it?' ;
+        if ModalBoxFrm.ShowModal = mrYes then OK := True ; ;
+        end;
+
+     if OK then
         begin
 
-//        OpenDialog.options := [ofPathMustExist] ;
+//      OpenDialog.options := [ofPathMustExist] ;
         OpenDialog.FileName := '' ;
 
         OpenDialog.DefaultExt := DataFileExtension ;
@@ -1521,12 +1550,14 @@ procedure TMainFrm.mnNewExperimentClick(Sender: TObject);
 // Select new experiment
 // ---------------------
 begin
-     if DataOverwriteCheck(
-        'New experiment: Existing data will be erased! Are you sure?') then
-        begin
-        NewExperiment ;
 
+     if not UnSavedData then NewExperiment
+     else
+        begin
+        ModalBoxFrm.MessageText := 'Experiment not saved: Are you sure you want to erase it?' ;
+        if ModalBoxFrm.ShowModal = mrYes then NewExperiment ;
         end;
+
      end;
 
 
@@ -1557,31 +1588,6 @@ begin
 
      end ;
 
-
-function TMainFrm.DataOverwriteCheck( Msg : String ) : Boolean ;
-// ----------------------------------------------------------
-// Allow user to cancel operation if data will be overwritten
-// ----------------------------------------------------------
-var
-    OK : Boolean ;
-begin
-     if UnSavedData then
-        begin
-        TDialogService.PreferredMode := TDialogService.TPreferredMode.Platform ;
-        TDialogService.MessageDialog( Msg,
-        TMsgDlgType.mtConfirmation,
-        [TMsgDlgBtn.mbYes,TMsgDlgBtn.mbNo],TMsgDlgBtn.mbNo,0,
-        procedure(const AResult: TModalResult)
-          begin
-          if AResult = mrYes then OK := True
-                             else OK := False ;
-          end
-          );
-        end
-     else OK := True ;
-     Result := OK ;
-
-end;
 
 procedure TMainFrm.SetDilutionEquation ;
 begin

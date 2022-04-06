@@ -4,39 +4,40 @@ object MainFrm: TMainFrm
   Caption = 
     'ObSim V4.0 : Organ Bath SImulation (c) J. Dempster, University o' +
     'f Strathclyde (2004-2020) '
-  ClientHeight = 887
-  ClientWidth = 1491
+  ClientHeight = 730
+  ClientWidth = 1181
   StyleBook = StyleBook1
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnCloseQuery = FormCloseQuery
   OnShow = FormShow
   DesignerMasterStyle = 0
   object DisplayGrp: TGroupBox
     Anchors = [akLeft, akTop, akRight, akBottom]
     Position.X = 304.000000000000000000
     Position.Y = 55.000000000000000000
-    Size.Width = 1177.000000000000000000
-    Size.Height = 826.000000000000000000
+    Size.Width = 867.000000000000000000
+    Size.Height = 669.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 0
     object DisplayPage: TTabControl
       Anchors = [akLeft, akTop, akRight, akBottom]
       Position.X = 16.000000000000000000
       Position.Y = 16.000000000000000000
-      Size.Width = 1153.000000000000000000
-      Size.Height = 798.000000000000000000
+      Size.Width = 841.000000000000000000
+      Size.Height = 648.000000000000000000
       Size.PlatformDefault = False
       TabIndex = 0
       TabOrder = 1
       TabPosition = PlatformDefault
       Sizes = (
-        1153s
-        771s
-        1153s
-        771s
-        1153s
-        771s)
+        841s
+        621s
+        841s
+        621s
+        841s
+        621s)
       object ChartTab: TTabItem
         CustomIcon = <
           item
@@ -55,8 +56,8 @@ object MainFrm: TMainFrm
           Anchors = [akLeft, akTop, akRight, akBottom]
           Position.X = 8.000000000000000000
           Position.Y = 40.000000000000000000
-          Size.Width = 1129.000000000000000000
-          Size.Height = 670.000000000000000000
+          Size.Width = 825.000000000000000000
+          Size.Height = 520.000000000000000000
           Size.PlatformDefault = False
           OnClick = scDisplayClick
           OnMouseUp = scDisplayMouseUp
@@ -100,8 +101,8 @@ object MainFrm: TMainFrm
         object TDisplayPanel: TPanel
           Anchors = [akLeft, akRight]
           Position.X = 8.000000000000000000
-          Position.Y = 719.000000000000000000
-          Size.Width = 1137.000000000000000000
+          Position.Y = 567.646606445312500000
+          Size.Width = 825.000000000000000000
           Size.Height = 44.000000000000000000
           Size.PlatformDefault = False
           StyleLookup = 'TDisplayPanelStyle1'
@@ -111,7 +112,7 @@ object MainFrm: TMainFrm
             Anchors = [akTop, akRight]
             TabOrder = 0
             OnKeyUp = edTDisplayKeyUp
-            Position.X = 1005.000000000000000000
+            Position.X = 693.000000000000000000
             Position.Y = 8.000000000000000000
             Size.Width = 84.000000000000000000
             Size.Height = 25.000000000000000000
@@ -145,7 +146,7 @@ object MainFrm: TMainFrm
             Orientation = Horizontal
             Position.X = 344.000000000000000000
             Position.Y = 8.000000000000000000
-            Size.Width = 513.000000000000000000
+            Size.Width = 201.000000000000000000
             Size.Height = 25.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 4
@@ -153,7 +154,7 @@ object MainFrm: TMainFrm
           object bTDisplayDouble: TButton
             Anchors = [akTop, akRight]
             StyledSettings = [Size, Style, FontColor]
-            Position.X = 1090.000000000000000000
+            Position.X = 778.000000000000000000
             Position.Y = 8.000000000000000000
             Size.Width = 33.000000000000000000
             Size.Height = 25.000000000000000000
@@ -166,7 +167,7 @@ object MainFrm: TMainFrm
           end
           object bTDisplayHalf: TButton
             Anchors = [akTop, akRight]
-            Position.X = 970.000000000000000000
+            Position.X = 658.000000000000000000
             Position.Y = 8.000000000000000000
             Size.Width = 33.000000000000000000
             Size.Height = 25.000000000000000000
@@ -178,7 +179,7 @@ object MainFrm: TMainFrm
           end
           object lbTDisplay: TLabel
             Anchors = [akTop, akRight]
-            Position.X = 864.000000000000000000
+            Position.X = 552.000000000000000000
             Position.Y = 8.000000000000000000
             Size.Width = 97.000000000000000000
             Size.Height = 17.000000000000000000
@@ -5461,7 +5462,7 @@ object MainFrm: TMainFrm
     Anchors = [akLeft, akTop, akBottom]
     Position.Y = 39.000000000000000000
     Size.Width = 289.000000000000000000
-    Size.Height = 826.000000000000000000
+    Size.Height = 669.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
     object TissueGrp: TGroupBox
@@ -5585,7 +5586,7 @@ object MainFrm: TMainFrm
         end
       end
     end
-    object TabControl2: TTabControl
+    object DrugsTab: TTabControl
       Anchors = [akLeft, akTop, akRight]
       Position.X = 10.000000000000000000
       Position.Y = 216.000000000000000000
@@ -5616,6 +5617,7 @@ object MainFrm: TMainFrm
         ExplicitSize.cx = 61.000000000000000000
         ExplicitSize.cy = 26.000000000000000000
         object cbAgonist: TComboBox
+          Hint = 'Select agonist drug'
           DropDownKind = Custom
           Position.X = 16.000000000000000000
           Position.Y = 14.000000000000000000
@@ -5624,8 +5626,11 @@ object MainFrm: TMainFrm
           Size.PlatformDefault = False
           StyleLookup = 'ComboBoxstyle'
           TabOrder = 0
+          ParentShowHint = False
+          ShowHint = True
         end
         object cbAgonistStockConc: TComboBox
+          Hint = 'Select stock solution concentration (M)'
           Position.X = 144.000000000000000000
           Position.Y = 54.000000000000000000
           Size.Width = 105.000000000000000000
@@ -5640,7 +5645,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
-          TabOrder = 2
         end
         object Label2: TLabel
           Position.X = 16.000000000000000000
@@ -5649,7 +5653,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
-          TabOrder = 3
         end
         object bAddAgonist: TButton
           Hint = 'Add agonist to organ bath'
@@ -5668,11 +5671,13 @@ object MainFrm: TMainFrm
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           StyleLookup = 'SESNumberBoxstyle'
           TabOrder = 5
+          Hint = 'Add volume (<=1ml) of agonist '
           Position.X = 144.000000000000000000
           Position.Y = 94.000000000000000000
           Size.Width = 105.000000000000000000
           Size.Height = 30.000000000000000000
           Size.PlatformDefault = False
+          ShowHint = True
           Text = ' 0.1 ml'
           Value = 0.100000001490116100
           ValueScale = 1.000000000000000000
@@ -5696,6 +5701,7 @@ object MainFrm: TMainFrm
         ExplicitSize.cx = 78.000000000000000000
         ExplicitSize.cy = 26.000000000000000000
         object cbAntagonist: TComboBox
+          Hint = 'Select antagonist drug'
           Position.X = 16.000000000000000000
           Position.Y = 14.000000000000000000
           Size.Width = 233.000000000000000000
@@ -5703,9 +5709,12 @@ object MainFrm: TMainFrm
           Size.PlatformDefault = False
           StyleLookup = 'ComboBoxstyle'
           TabOrder = 0
+          ParentShowHint = False
+          ShowHint = True
           OnChange = cbAntagonistChange
         end
         object cbAntagonistStockConc: TComboBox
+          Hint = 'Select stock solution concentration (M)'
           Position.X = 144.000000000000000000
           Position.Y = 54.000000000000000000
           Size.Width = 105.000000000000000000
@@ -5720,7 +5729,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
-          TabOrder = 2
         end
         object Label4: TLabel
           Position.X = 16.000000000000000000
@@ -5729,7 +5737,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
-          TabOrder = 3
         end
         object bAddAntagonist: TButton
           Position.X = 16.000000000000000000
@@ -5745,12 +5752,15 @@ object MainFrm: TMainFrm
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           StyleLookup = 'SESNumberBoxstyle'
           TabOrder = 5
+          Hint = 'Add volume (<=1ml) of antagonist'
           Position.X = 144.000000000000000000
           Position.Y = 94.000000000000000000
           Size.Width = 105.000000000000000000
           Size.Height = 30.000000000000000000
           Size.PlatformDefault = False
-          Text = ' 0 ml'
+          ShowHint = True
+          Text = ' 0.1 ml'
+          Value = 0.100000001490116100
           ValueScale = 1.000000000000000000
           Units = 'ml'
           NumberFormat = '%.4g'
@@ -5772,6 +5782,7 @@ object MainFrm: TMainFrm
         ExplicitSize.cx = 71.000000000000000000
         ExplicitSize.cy = 26.000000000000000000
         object cbUnknown: TComboBox
+          Hint = 'Select unknown drug'
           Position.X = 16.000000000000000000
           Position.Y = 14.000000000000000000
           Size.Width = 233.000000000000000000
@@ -5779,6 +5790,8 @@ object MainFrm: TMainFrm
           Size.PlatformDefault = False
           StyleLookup = 'ComboBoxstyle'
           TabOrder = 0
+          ParentShowHint = False
+          ShowHint = True
           OnChange = cbUnknownChange
         end
         object Label5: TLabel
@@ -5788,9 +5801,9 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
-          TabOrder = 2
         end
         object cbUnknownStockConc: TComboBox
+          Hint = 'Select stock solution concentration (M)'
           Position.X = 144.000000000000000000
           Position.Y = 54.000000000000000000
           Size.Width = 105.000000000000000000
@@ -5806,7 +5819,6 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
-          TabOrder = 3
         end
         object bAddUnknown: TButton
           Position.X = 16.000000000000000000
@@ -5822,12 +5834,15 @@ object MainFrm: TMainFrm
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           StyleLookup = 'SESNumberBoxstyle'
           TabOrder = 5
+          Hint = 'Add volume (<=1ml) of unknown drug '
           Position.X = 144.000000000000000000
           Position.Y = 94.000000000000000000
           Size.Width = 105.000000000000000000
           Size.Height = 30.000000000000000000
           Size.PlatformDefault = False
-          Text = ' 0 ml'
+          ShowHint = True
+          Text = ' 0.1 ml'
+          Value = 0.100000001490116100
           ValueScale = 1.000000000000000000
           Units = 'ml'
           NumberFormat = '%.4g'
@@ -7684,16 +7699,16 @@ object MainFrm: TMainFrm
           0000}
       end>
     Left = 24
-    Top = 664
+    Top = 624
   end
   object Timer: TTimer
     Interval = 100
     OnTimer = TimerTimer
-    Left = 72
-    Top = 672
+    Left = 88
+    Top = 624
   end
   object MenuBar1: TMenuBar
-    Size.Width = 1491.000000000000000000
+    Size.Width = 1181.000000000000000000
     Size.Height = 49.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
@@ -7748,11 +7763,11 @@ object MainFrm: TMainFrm
     end
   end
   object OpenDialog: TOpenDialog
-    Left = 120
-    Top = 664
+    Left = 144
+    Top = 624
   end
   object SaveDialog: TSaveDialog
-    Left = 200
-    Top = 672
+    Left = 216
+    Top = 624
   end
 end

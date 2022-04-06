@@ -18,6 +18,10 @@ const
     tArterialRing = 4 ;
     tJejunum = 8 ;
 
+    dtAgonist = 0 ;
+    dtAntagonist = 1 ;
+    dtUnknown = 3 ;
+
     NumChannels = 1 ;
     chForce = 0 ;
 
@@ -28,7 +32,7 @@ const
     RMaxStDev = 0.05 ;
     cBathVolume = 10.0 ;          // Organ bath volume (ml)
     ReservoirVolume = 1000.0 ;   // Krebs solution reservoir volume (ml)
-    dt = 0.05 ;
+    dt = 0.1 ;
 
 
 
@@ -44,6 +48,7 @@ type
           EC50_HistR : single ;
           EC50_HistR_NC : single ;
           EC50_nAchR : single ;
+          EC50_AchEsterase : single ;
           EC50_mAchR : single ;
           EC50_mAchR_NC : single ;
           EC50_OpR : Single ;
@@ -76,6 +81,10 @@ type
     nAch_EC50 : Single ;
     MaxReleasedAch : Single ;
 
+    NerveStimulationOn : Boolean ;                           // TRUE = nerve stimulation on
+    MuscleStimulationOn : Boolean ;                          // TRUE = muscle stimulation on
+
+
      // Randomly vary maximal response of next agonist application
 
 
@@ -85,16 +94,23 @@ type
 
     CyclicNerveReleasedAch : Single ;
 
+    procedure SetNerveStimulation( Value : Boolean ) ;
+    procedure SetMuscleStimulation( Value : Boolean ) ;
+
   public
     { Public declarations }
     ModelType : NativeInt ;                               // Type of model in use
 
     t : single ;                                        // Elapsed time since start of simulation
     tStimulus : single ;                                // Time of stimulus (s)
-    tNextStimulus : single ;                            // Time for next stimulus (s)
+    tNerveStimulusDecay : single ;                      // Nerve stimulus decay time
+    tMuscleStimulusDecay : single ;                     // Muscle stimulus decay time
     tStimulationPeriod : Single ;                       // Stimulation period (s)
 
     NerveReleasedNorAdrenaline : Single ;     // Noradrenaline released by mesenteric nerve
+    NerveReleasedAch : Single ;               // Ach released by mesenteric nerve
+    DirectMuscleActivation : single ;         // Fraction of muscles activated by electrical stimulation
+
     StimFrequency : Single ;
     idxNoradrenaline : Integer ;
     Desensitisation : Single ;
@@ -106,8 +122,6 @@ type
     NumDrugs : Integer ;                                // No. drugs available
     Drugs : Array[0..MaxDrugs-1] of TDrug ;             // Drug properties array
     ReservoirDrugs : Array[0..MaxDrugs-1] of TDrug ;    // Drug properties array
-    NerveStimulationOn : Boolean ;                           // TRUE = nerve stimulation on
-    MuscleStimulationOn : Boolean ;                          // TRUE = muscle stimulation on
 
     RMax : Single ;      // Maximal response in current use
     NextRMax : Single ;  // RMax after next agonist application
@@ -127,8 +141,11 @@ type
     procedure DoChickBiventerSimulationStep ;
     procedure GetListOfDrugs(
               DrugList : TStrings ;         // Return list of drugs
-              DrugType : string ) ;         // Type of drug (Agonist,Antagonist,Unknown)
+              DrugType : Integer ) ;         // Type of drug (Agonist,Antagonist,Unknown)
 
+
+    property NerveStimulation : Boolean read NerveStimulationOn write SetNerveStimulation ;
+    property MuscleStimulation : Boolean read MuscleStimulationOn write SetMuscleStimulation ;
 
   end;
 
@@ -155,7 +172,7 @@ begin
     ChanValues[0] := 0.0 ;
 
     BathVolume := cBathVolume ;
-    tStimulationPeriod := 5.0 ;
+    tStimulationPeriod := 2.5 ;
 
 end;
 
@@ -164,19 +181,19 @@ procedure TModel.GetListOfModels( Models : TStrings ) ;
 // Return list of model names with selection index
 // -----------------------------------------------
 begin
+
      Models.Clear ;
      Models.AddObject('Guinea Pig Ileum',TObject(tGPIleum));
      Models.AddObject('Chick Biventer Cervicis',TObject(tChickBiventer));
      Models.AddObject('Rabbit Arterial Ring',TObject(tArterialRing));
      Models.AddObject('Rabbit Jejunum',TObject(tJejunum));
 
-
 end;
 
 
 procedure TModel.GetListOfDrugs(
           DrugList : TStrings ;         // Return list of drugs
-          DrugType : string ) ;         // Type of drug (Agonist,Antagonist,Unknown)
+          DrugType : Integer ) ;        // Type of drug (Agonist,Antagonist,Unknown)
 // ---------------------------------------
 // Return list of drugs of specified type
 // ---------------------------------------
@@ -187,16 +204,19 @@ begin
          begin
          if (Drugs[i].Tissue and ModelType) <> 0 then
             begin
-            if ContainsText(DrugType,'ant') and (not Drugs[i].Unknown) then
+            if (DrugType = dtAntagonist) and Drugs[i].Antagonist and (not Drugs[i].Unknown) then
                begin
+               // Antagonist drug
                DrugList.AddObject( Drugs[i].Name, TObject(i)) ;
                end
-            else if ContainsText(DrugType,'unk') then
+            else if (DrugType = dtUnknown) and Drugs[i].Unknown then
                begin
+               // Unknown drug
                DrugList.AddObject( Drugs[i].Name, TObject(i)) ;
                end
-            else
+            else if (DrugType = dtAgonist) and (not Drugs[i].Antagonist) and (not Drugs[i].Unknown) then
                begin
+               // Agonist drug
                DrugList.AddObject( Drugs[i].Name, TObject(i)) ;
                end;
            end ;
@@ -224,6 +244,7 @@ begin
           Drugs[i].EC50_HistR := 1E30 ;
           Drugs[i].EC50_HistR_NC := 1E30 ;
           Drugs[i].EC50_nAchR := 1E30 ;
+          Drugs[i].EC50_AchEsterase := 1E30 ;
           Drugs[i].EC50_mAchR := 1E30 ;
           Drugs[i].EC50_mAchR_NC := 1E30 ;
           Drugs[i].EC50_OpR := 1E30 ;
@@ -457,6 +478,24 @@ begin
      Drugs[NumDrugs].Tissue := tGPIleum + tChickBiventer + tJejunum ;
      Inc(NumDrugs) ;
 
+     Drugs[NumDrugs].Name := 'Neostigmine' ; // Cholinesterase inhibitor
+     Drugs[NumDrugs].ShortName := 'Neo' ;
+     Drugs[NumDrugs].FinalBathConcentration := 0.0 ;
+     Drugs[NumDrugs].BathConcentration := 0.0 ;
+     Drugs[NumDrugs].EC50_AchEsterase := 1E-6*RandG(1.0,0.05) ;
+     Drugs[NumDrugs].Antagonist := True ;
+     Drugs[NumDrugs].Tissue := tChickBiventer ;
+     Inc(NumDrugs) ;
+
+     Drugs[NumDrugs].Name := 'Suxamethonium' ; // Depolarizing neuromuscular blocker / Nicotinic agonist
+     Drugs[NumDrugs].ShortName := 'Sux' ;
+     Drugs[NumDrugs].FinalBathConcentration := 0.0 ;
+     Drugs[NumDrugs].BathConcentration := 0.0 ;
+     Drugs[NumDrugs].EC50_nAchR := 1E-6*RandG(1.0,0.05) ;
+     Drugs[NumDrugs].Antagonist := False ;
+     Drugs[NumDrugs].Tissue := tChickBiventer ;
+     Inc(NumDrugs) ;
+
      Drugs[NumDrugs].Name := 'Pilocarpine' ; // Cholinoceptor agonist
      Drugs[NumDrugs].ShortName := 'Pil' ;
      Drugs[NumDrugs].FinalBathConcentration := 0.0 ;
@@ -489,6 +528,18 @@ begin
      Inc(NumDrugs) ;
 
      // Unknown drugs
+
+     // MP220: Oxybutynin: Muscarinic antagonist
+     Drugs[NumDrugs].Name := 'MP220' ;
+     Drugs[NumDrugs].ShortName := 'MP220' ;
+     Drugs[NumDrugs].FinalBathConcentration := 0.0 ;
+     Drugs[NumDrugs].BathConcentration := 0.0 ;
+     Drugs[NumDrugs].EC50_HistR := 2E-6*RandG(1.0,0.05) ;
+     Drugs[NumDrugs].EC50_mAchR := 1E-9*RandG(1.0,0.05) ;
+     Drugs[NumDrugs].Antagonist := True ;
+     Drugs[NumDrugs].Tissue := tGPIleum ;
+     Drugs[NumDrugs].Unknown := True ;
+     Inc(NumDrugs) ;
 
      Drugs[NumDrugs].Name := 'Drug 1' ; // Histamine antagonist / weak musc.
      Drugs[NumDrugs].ShortName := 'Dr1' ;
@@ -649,6 +700,7 @@ begin
      Drugs[NumDrugs].Units := 'ml' ;
      Inc(NumDrugs) ;
 
+
      // Copy set of drugs into reservoir
      for i:= 0 to NumDrugs-1 do ReservoirDrugs[i] := Drugs[i] ;
 
@@ -691,8 +743,8 @@ begin
      // Clear stimulus frequency
      StimFrequency := 0.0 ;
      t := 0.0 ;                    // Init. time counter
-     tStimulus := 0.0 ;
-     tNextStimulus := 0.0 ;
+     tNerveStimulusDecay := 1E30 ;  // Nerve stimulation decay disabled
+     tMuscleStimulusDecay := 1E30 ; // Musxle stimulation decay disabled
 
 end;
 
@@ -724,7 +776,7 @@ var
     Occupancy : Single ;
 
 
-    NerveReleasedAch : Single ;
+
     EndogenousOpiate : Single ;
     Activation50 : Single ;
     MaxDirectMuscleActivation,DirectMuscleActivation : single ;
@@ -824,35 +876,38 @@ begin
     if NerveStimulationOn then
        begin
        // Nerve released ACh
-       if t >= tNextStimulus then
+       if t >= tStimulus then
           begin
-          tStimulus := tNextStimulus ;
-          tNextStimulus := tStimulus + tStimulationPeriod ;
+          NerveReleasedAch := MaxReleasedAch ;
+          tNerveStimulusDecay := 0.0 ;
+          tStimulus := tStimulus + tStimulationPeriod ;
           end;
-       tStimulusDecay := t - tStimulus ;
-       NerveReleasedAch := MaxReleasedAch*(1.0 - exp(-tStimulusDecay/0.1))*exp(-tStimulusDecay/0.25) ;
-       DirectMuscleActivation := 0.0 ;
        end ;
+
+
+    if tNerveStimulusDecay < 10.0 then
+       begin
+       NerveReleasedAch := MaxReleasedAch*(1.0 - exp(-tNerveStimulusDecay/0.1))*exp(-tNerveStimulusDecay/0.25) ;
+       tNerveStimulusDecay := tNerveStimulusDecay + dt ;
+       end;
 
     // Stimulate muscle
     if MuscleStimulationOn then
        begin
        // Direct activation of smooth muscle
-       if t >= tNextStimulus then
+       if t >= tStimulus then
           begin
-          tStimulus := tNextStimulus ;
-          tNextStimulus := tStimulus + tStimulationPeriod ;
+          tMuscleStimulusDecay := 0.0 ;
+          tStimulus := tStimulus + tStimulationPeriod ;
           end;
-       NerveReleasedAch := 0.0 ;
-       tStimulusDecay := t - tStimulus ;
-       DirectMuscleActivation := MaxDirectMuscleActivation*(1.0 - exp(-tStimulusDecay/0.1))*exp(-tStimulusDecay/0.25) ;
+       end ;
+
+    if tMuscleStimulusDecay < 10.0 then
+       begin
+       DirectMuscleActivation := MaxDirectMuscleActivation*(1.0 - exp(-tMuscleStimulusDecay/0.1))*exp(-tMuscleStimulusDecay/0.25) ;
+       tMuscleStimulusDecay := tMuscleStimulusDecay + dt ;
        end;
 
-    if (not NerveStimulationOn) and (not MuscleStimulationOn) then
-       begin
-       NerveReleasedAch := 0.0 ;
-       DirectMuscleActivation := 0.0 ;
-       end;
 //    NerveReleasedAch := NerveReleasedAch + CyclicNerveReleasedAch*MaxReleasedAch ;
 
     // Histamine receptor activation
@@ -1205,7 +1260,7 @@ begin
     end ;
 
 
-procedure TModel.DoChickBiventerSimulationStep ;
+{procedure TModel.DoChickBiventerSimulationStep ;
 // ------------------------------------------------
 // Compute next Chick Biventer simulation time step
 // ------------------------------------------------
@@ -1296,8 +1351,155 @@ begin
     ChanValues[chForce] := RandG( 0.0, BackgroundNoiseStDev )
                           + Force ;
 
+    end ;  }
+
+
+
+procedure TModel.DoChickBiventerSimulationStep ;
+// ------------------------------------------------
+// Compute next Chick Biventer simulation time step
+// ------------------------------------------------
+//
+const
+    StimulusInterval = 1.0 ;
+var
+    i : Integer ;
+    tStimulusDecay : single ;
+    Conc,dConc : Single ;
+    nAchR : Single ;
+    AchEsterase : Single ;          // Cholinesterase inhibition
+    nAchRDesensitization : Single ; // Nicotinic junctional receptor desensitization
+    Sum : Single ;
+    Efficacy : Single ;
+    Occupancy : Single ;
+    t : Single ;
+    NerveReleasedAch : Single ;
+    R : Single ;
+    RNerve : Single ;
+    MixingRate : single ;
+    Force : single ;
+begin
+
+    // Update drug bath concentrations
+    MixingRate := (MaxMixingRate*InitialMixing) / ( 100.0 + InitialMixing) ;
+    for i := 0 to NumDrugs-1 do
+        begin
+        dConc := (Drugs[i].FinalBathConcentration - Drugs[i].BathConcentration)*MixingRate*dt ;
+        Drugs[i].BathConcentration := Max(Drugs[i].BathConcentration + dConc,0.0) ;
+        end ;
+
+    // Cholinesterase inhibition (1=fully active, 0= inhibited)
+    Sum := 0.0 ;
+    for i := 0 to NumDrugs-1 do
+        begin
+        R := Drugs[i].BathConcentration/Drugs[i].EC50_AchEsterase ;
+        Sum := Sum + R  ;
+        end ;
+    Occupancy := sum / ( 1. + sum ) ;
+
+    Efficacy := 0.0 ;
+    for i := 0 to NumDrugs-1 do
+        begin
+        R := Drugs[i].BathConcentration/Drugs[i].EC50_AchEsterase ;
+        Efficacy := Efficacy + R ;
+        end ;
+    Efficacy := Efficacy / ( Sum + 0.001 ) ;
+    AchEsterase :=  efficacy*occupancy ;
+
+    // Nicotinic cholinoceptor receptor activation by agonists in bath
+
+    Sum := 0.0 ;
+    for i := 0 to NumDrugs-1 do
+        begin
+        Conc := Drugs[i].BathConcentration ;
+        if ContainsText(Drugs[i].Name,'acetylcholine') then Conc := Conc*(1.0 + AchEsterase*10.0) ;
+        R := Conc / Drugs[i].EC50_nAchR ;
+        Sum := Sum + R*R  ;
+        end ;
+    Occupancy := sum / ( 1. + sum ) ;
+
+    Efficacy := 0.0 ;
+    for i := 0 to NumDrugs-1 do if not Drugs[i].Antagonist then
+        begin
+        Conc := Drugs[i].BathConcentration ;
+        if ContainsText(Drugs[i].Name,'acetylcholine') then Conc := Conc*(1.0 + AchEsterase*10.0) ;
+        R := Conc/Drugs[i].EC50_nAchR ;
+        Efficacy := Efficacy + R*R ;
+        end ;
+    nAchR :=  efficacy*occupancy ;
+
+    // Desensitization of junctional receptors after acivation by nicotinic agonists
+    nAchRDesensitization := 1.0/(1.0 + (nAchR*nAChR)*5000.0) ;
+
+    // Stimulate nerve
+    if NerveStimulationOn then
+       begin
+       // Nerve released ACh
+       if t >= tStimulus then
+          begin
+          NerveReleasedAch := MaxReleasedAch ;
+          tNerveStimulusDecay := 0.0 ;
+          tStimulus := tStimulus + tStimulationPeriod ;
+          end;
+       end ;
+
+    if tNerveStimulusDecay < 10.0 then
+       begin
+       NerveReleasedAch := MaxReleasedAch*(1.0 - exp(-tNerveStimulusDecay/0.1))*exp(-tNerveStimulusDecay/0.25) ;
+       tNerveStimulusDecay := tNerveStimulusDecay + dt ;
+       end;
+
+    // Add nerve activated juntional nicotinic receptors to total
+    R := (NerveReleasedAch*nAchRDesensitization*(1.0 + AchEsterase*10.0))/nAch_EC50 ;
+    Sum := Sum + (R*R) ;
+    Occupancy := sum / ( 1. + sum ) ;
+    Efficacy := (Efficacy + (R*R))/ ( Sum + 0.001 ) ;
+    nAchR :=  efficacy*occupancy ;
+
+    // Stimulate muscle
+    if MuscleStimulationOn then
+       begin
+       // Direct activation of smooth muscle
+       if t >= tStimulus then
+          begin
+          tStimulus := tStimulus + tStimulationPeriod ;
+          tMuscleStimulusDecay := 0.0 ;
+          end;
+       end;
+
+    if tStimulusDecay < 10.0 then
+       begin
+       DirectMuscleActivation := (1.0 - exp(-tStimulusDecay/0.1))*exp(-tStimulusDecay/0.25) ;
+       tMuscleStimulusDecay := tMuscleStimulusDecay + dt ;
+       end;
+
+    Force := RandG( 0.0, BackgroundNoiseStDev ) ;
+    Force := Force + RMax*Min(nAchR + DirectMuscleActivation,1.0) ;
+
+    // Contraction
+    ChanValues[chForce] := RandG( 0.0, BackgroundNoiseStDev )
+                          + Force ;
+
     end ;
 
+procedure TModel.SetNerveStimulation( Value : Boolean ) ;
+// --------------------------
+// Set nerve stimulation flag
+// --------------------------
+begin
+     NerveStimulationOn := Value ;
+     tStimulus := t ;
+end;
+
+
+procedure TModel.SetMuscleStimulation( Value : Boolean ) ;
+// --------------------------
+// Set Muscle stimulation flag
+// --------------------------
+begin
+     MuscleStimulationOn := Value ;
+     tStimulus := t ;
+end;
 
 
 
