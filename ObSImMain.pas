@@ -81,7 +81,7 @@ uses
   FMX.Controls.Presentation, FMX.StdCtrls, FMX.Edit, FMX.Ani, FMX.TabControl,
   FMX.ListBox, FMX.EditBox, FMX.NumberBox,
   SESNumberBox, FMX.Objects, SESScopeDisplay, System.IOUtils, System.ANsiStrings,
-  FMX.Menus, FMX.Platform, ObSimModel, FMX.Layouts ;
+  FMX.Menus, FMX.Platform, ObSimModel, FMX.Layouts, System.Actions, FMX.ActnList ;
 
 const
     MaxPoints = 1000000 ;
@@ -208,7 +208,6 @@ type
       Shift: TShiftState);
     procedure bAddAgonistClick(Sender: TObject);
     procedure bFlushReservoirToBathClick(Sender: TObject);
-    procedure scDisplayClick(Sender: TObject);
     procedure scDisplayMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Single);
     procedure mnExitClick(Sender: TObject);
@@ -228,6 +227,8 @@ type
     procedure edStartTimeKeyUp(Sender: TObject; var Key: Word;
       var KeyChar: Char; Shift: TShiftState);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure sbDisplayChange(Sender: TObject);
+    procedure Action1Execute(Sender: TObject);
 
   private
     { Private declarations }
@@ -235,17 +236,17 @@ type
     NumPointsInBuf : Integer ;   // No. of data points in buffer
     StartPoint : Integer ;
     NumPointsDisplayed : Integer ;
+    ChangeDisplayWindow : Boolean ;
+    ClearExperiment : Boolean ;
 
     MarkerList : TStringList ;   // Chart annotation list
-
-{    RMax : Single ;      // Maximal response in current use
-    NextRMax : Single ;  // RMax after next agonist application
-    force : single ;}
 
     UnsavedData : Boolean ;  // Un-saved data flag
     HelpFilePath : string ;
 
     procedure NewExperiment ;
+    procedure EraseExperimentQuery( ModalQuery : Boolean ) ;
+
     procedure SetStockConcentrationList(
               iDrug : NativeInt ;
               ComboBox : TComboBox ) ;
@@ -343,6 +344,9 @@ begin
     if not UnSavedData then CanClose := True
     else
         begin
+        ModalBoxFrm.Left := Self.Left + 10 ;
+        ModalBoxFrm.Top := Self.Top + 10 ;
+        ModalBoxFrm.Caption := 'Close Program' ;
         ModalBoxFrm.MessageText := 'Experiment not saved: Are you sure you want to close the program' ;
         if ModalBoxFrm.ShowModal = mrYes then CanClose := True
                                          else CanClose := False ;
@@ -597,9 +601,34 @@ begin
      StopSimulation ;
 
      UnSavedData := False ;
+     ChangeDisplayWindow := True ;
 
      end ;
 
+
+procedure TMainFrm.Action1Execute(Sender: TObject);
+var
+    OK : Boolean ;
+begin
+
+     if not UnsavedData then NewExperiment
+     else
+        begin
+
+        ModalBoxFrm.Left := Self.Left + 10 ;
+        ModalBoxFrm.Top := Self.Top + 10 ;
+        ModalBoxFrm.Caption := 'New Experiment' ;
+        ModalBoxFrm.MessageText := 'Experiment not saved: Are you sure you want to erase it?' ;
+        ModalBoxFrm.Show ;
+
+        if ModalBoxFrm.ShowModal = mrYes then OK := True
+                                         else OK := False ;
+        if OK then NewExperiment ;
+        end;
+
+
+     Log.d('action1');
+end;
 
 procedure TMainFrm.AddChartAnnotations ;
 // -------------------------------------
@@ -622,16 +651,18 @@ begin
      end ;
 
 
-
-
-
 procedure TMainFrm.edStartTimeKeyUp(Sender: TObject; var Key: Word;
   var KeyChar: Char; Shift: TShiftState);
 // ------------------------
 // Start time - Key pressed
 // ------------------------
 begin
-    if Key = 13 then UpdateDisplayDuration ;
+    if Key = 13 then
+       begin
+       sbDisplay.Value := Round(edStartTime.Value) ;
+       UpdateDisplayDuration ;
+       end;
+
     end;
 
 
@@ -641,9 +672,11 @@ procedure TMainFrm.edTDisplayKeyUp(Sender: TObject; var Key: Word;
 // Display duration - key pressed
 // ------------------------------
 begin
-    if Key = 13 then UpdateDisplayDuration ;
+    if Key = 13 then
+       begin
+       UpdateDisplayDuration ;
+       end;
     end;
-
 
 
 procedure TMainFrm.UpdateDisplay(
@@ -694,6 +727,11 @@ begin
     scDisplay.VerticalCursors[0] := scDisplay.MaxPoints div 2 ;
     scDisplay.XOffset := Round(edStartTime.Value) ;
     sbDisplay.Value := Round(edStartTime.Value) ;
+    scDisplay.SetDataBuf( @ADC[Round(sbDisplay.Value)] ) ;
+
+    // Add annotations to chart
+    AddChartAnnotations ;
+
     scDisplay.Repaint ;
     end;
 
@@ -801,6 +839,12 @@ begin
      // Ensure that horizontal cursor remains at zero
      if scDisplay.HorizontalCursors[0] <> 0.0 then scDisplay.HorizontalCursors[0] := 0.0 ;
 
+     if ClearExperiment and ModalBoxFrm.OK then
+        begin
+        NewExperiment ;
+        ClearExperiment := False ;
+        end;
+
      if not bRecord.Enabled then
         begin
         case Model.ModelType of
@@ -816,15 +860,18 @@ begin
      else
         begin
         // Display
-        if scDisplay.XOffset <> sbDisplay.Value then begin
+        if ChangeDisplayWindow then begin
            scDisplay.XOffset := Round(sbDisplay.Value) ;
            edStartTime.Value := scDisplay.XOffset ;
            scDisplay.SetDataBuf( @ADC[Round(sbDisplay.Value)] ) ;
-           scDisplay.NumPoints := Min( {scDisplay.MaxPoints}NumPointsInBuf-Round(sbDisplay.Value)-1,
+           scDisplay.MaxPoints := Round(edTDisplay.Value);
+           scDisplay.XMax := scDisplay.MaxPoints -1 ;
+           scDisplay.NumPoints := Min( NumPointsInBuf-Round(sbDisplay.Value)-1,
                                        Round(sbDisplay.Max - sbDisplay.Value)) ;
            // Add annotations to chart
            AddChartAnnotations ;
-//           scDisplay.Invalidate ;
+           ChangeDisplayWindow := False ;
+           scDisplay.Repaint ;
            end ;
         end ;
 
@@ -1210,7 +1257,9 @@ begin
      bNewExperiment.Enabled := True ;
      TissueGrp.Enabled := True ;
      bStimulationOff.Enabled := False ;
-     bStimulationOn.Enabled := False ;
+     bStimulationOn.Enabled := True ;
+     Model.MuscleStimulation := False ;
+     Model.NerveStimulation := False ;
 
      end;
 
@@ -1242,15 +1291,31 @@ procedure TMainFrm.bNewExperimentClick(Sender: TObject);
 // Select new experiment
 // ---------------------
 begin
+     EraseExperimentQuery( false ) ;
+     end;
 
-     if not UnSavedData then NewExperiment
+
+procedure TMainFrm.EraseExperimentQuery( ModalQuery : Boolean ) ;
+// -----------------------------------
+// Query user to clear experiment data
+// -----------------------------------
+begin
+
+     ClearExperiment := True ;
+     if not UnSavedData then ModalBoxFrm.OK := True
      else
         begin
+        ModalBoxFrm.Left := Self.Left + 10 ;
+        ModalBoxFrm.Top := Self.Top + 10 ;
+        ModalBoxFrm.Caption := 'New Experiment' ;
         ModalBoxFrm.MessageText := 'Experiment not saved: Are you sure you want to erase it?' ;
-        if ModalBoxFrm.ShowModal = mrYes then NewExperiment ;
-        end;
+        if ModalQuery then ModalBoxFrm.ShowModal
+                      else ModalBoxFrm.Show ;
+        end ;
 
-     end;
+     Log.d('Eraseexperimentquery');
+
+end;
 
 
 procedure TMainFrm.cbAntagonistChange(Sender: TObject);
@@ -1348,18 +1413,20 @@ begin
      end ;
 
 
-procedure TMainFrm.scDisplayClick(Sender: TObject);
-// -------------------------------
-// Mouse button clicked on display
-// -------------------------------
+procedure TMainFrm.sbDisplayChange(Sender: TObject);
+// ---------------------------
+// Scroll bar sosition changed
+// ---------------------------
 begin
-//
-//     scDisplay.Repaint ;
-
+    ChangeDisplayWindow := True ;
 end;
+
 
 procedure TMainFrm.scDisplayMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Single);
+// -------------------------------
+// Mouse released on chart display
+// -------------------------------
 var
     ch : Integer ;
 begin
@@ -1457,10 +1524,11 @@ begin
      Header.Free ;
 
      UnsavedData := False ;
-     scDisplay.XOffset := -1 ;
+     scDisplay.XOffset := 0 ;
      sbDisplay.Value := 0 ;
      sbDisplay.Max := NumPointsInBuf ;
-//     scDisplay.Invalidate ;
+
+     ChangeDisplayWindow := True ;
 
      end ;
 
@@ -1515,18 +1583,11 @@ procedure TMainFrm.mnLoadExperimentClick(Sender: TObject);
 // -------------------------
 // Load experiment from file
 // -------------------------
-var
-    OK : Boolean ;
 begin
 
-     OK := False ;
-     if UnSavedData then
-        begin
-        ModalBoxFrm.MessageText := 'Experiment not saved: Are you sure you want to erase it?' ;
-        if ModalBoxFrm.ShowModal = mrYes then OK := True ; ;
-        end;
+     EraseExperimentQuery( true ) ;
 
-     if OK then
+     if ModalBoxFrm.OK then
         begin
 
 //      OpenDialog.options := [ofPathMustExist] ;
@@ -1534,12 +1595,15 @@ begin
 
         OpenDialog.DefaultExt := DataFileExtension ;
    //OpenDialog.InitialDir := OpenDirectory ;
-       OpenDialog.Filter := format( ' Organ Bath Expt. (*%s)|*%s',
+        OpenDialog.Filter := format( ' Organ Bath Expt. (*%s)|*%s',
                                 [DataFileExtension,DataFileExtension]) ;
-       OpenDialog.Title := 'Load Experiment ' ;
+        OpenDialog.Title := 'Load Experiment ' ;
 
        // Open selected data file
-       if OpenDialog.execute then LoadFromFile( OpenDialog.FileName ) ;
+        if OpenDialog.execute then LoadFromFile( OpenDialog.FileName ) ;
+
+        ModalBoxFrm.OK := False ;
+        ClearExperiment := False ;
         end;
 
    end;
@@ -1550,14 +1614,7 @@ procedure TMainFrm.mnNewExperimentClick(Sender: TObject);
 // Select new experiment
 // ---------------------
 begin
-
-     if not UnSavedData then NewExperiment
-     else
-        begin
-        ModalBoxFrm.MessageText := 'Experiment not saved: Are you sure you want to erase it?' ;
-        if ModalBoxFrm.ShowModal = mrYes then NewExperiment ;
-        end;
-
+     EraseExperimentQuery( false ) ;
      end;
 
 
@@ -1755,8 +1812,6 @@ begin
      else Result := Value ;
 
 end;
-
-
 
 
 function TMainFrm.GetKeyValue( List : TStringList ;  // List for Key=Value pairs

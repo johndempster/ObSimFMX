@@ -126,8 +126,6 @@ type
     RMax : Single ;      // Maximal response in current use
     NextRMax : Single ;  // RMax after next agonist application
 
-
-
     iCaBath : Integer ;
     InitialMixing : Cardinal ;
     BathVolume : Single ;                               // Volume of organ bath (ml)
@@ -142,8 +140,6 @@ type
     procedure GetListOfDrugs(
               DrugList : TStrings ;         // Return list of drugs
               DrugType : Integer ) ;         // Type of drug (Agonist,Antagonist,Unknown)
-
-
     property NerveStimulation : Boolean read NerveStimulationOn write SetNerveStimulation ;
     property MuscleStimulation : Boolean read MuscleStimulationOn write SetMuscleStimulation ;
 
@@ -749,9 +745,15 @@ begin
 end;
 
 procedure TModel.DoSimulationStep  ;
+// ----------------------------
+// Execute simulation time step
+// ----------------------------
 begin
     case ModelType of
         tGPIleum : DoGPIleumSimulationStep( CyclicNerveReleasedAch ) ;
+        tJejunum : DoJejunumSimulationStep ;
+        tArterialRing : DoArterialRingSimulationStep ;
+        tChickBiventer : DoChickBiventerSimulationStep ;
     end;
 end;
 

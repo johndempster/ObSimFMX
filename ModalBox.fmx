@@ -2,7 +2,8 @@ object ModalBoxFrm: TModalBoxFrm
   Left = 0
   Top = 0
   ClientHeight = 84
-  ClientWidth = 342
+  ClientWidth = 396
+  FormStyle = StayOnTop
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
@@ -25,6 +26,7 @@ object ModalBoxFrm: TModalBoxFrm
     Size.PlatformDefault = False
     TabOrder = 2
     Text = 'Yes'
+    OnClick = mYesClick
   end
   object bNo: TButton
     ModalResult = 7
@@ -35,5 +37,6 @@ object ModalBoxFrm: TModalBoxFrm
     Size.PlatformDefault = False
     TabOrder = 1
     Text = 'No'
+    OnClick = bNoClick
   end
 end

@@ -59,7 +59,6 @@ object MainFrm: TMainFrm
           Size.Width = 825.000000000000000000
           Size.Height = 520.000000000000000000
           Size.PlatformDefault = False
-          OnClick = scDisplayClick
           OnMouseUp = scDisplayMouseUp
           CursorChangeInProgress = False
           NumChannels = 1
@@ -150,6 +149,7 @@ object MainFrm: TMainFrm
             Size.Height = 25.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 4
+            OnChange = sbDisplayChange
           end
           object bTDisplayDouble: TButton
             Anchors = [akTop, akRight]
@@ -5476,7 +5476,6 @@ object MainFrm: TMainFrm
       TabOrder = 1
       object bNewExperiment: TButton
         Anchors = [akLeft, akTop, akRight]
-        Hint = 'Erase existing chart data and select a new experiment.'
         Position.X = 16.000000000000000000
         Position.Y = 64.000000000000000000
         RepeatClick = True
