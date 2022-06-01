@@ -5544,17 +5544,19 @@ object MainFrm: TMainFrm
         object edStimFrequency: TSESNumberBox
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           TabOrder = 1
+          OnKeyUp = edStimFrequencyKeyUp
           Position.X = 8.000000000000000000
           Position.Y = 24.000000000000000000
           Size.Width = 100.000000000000000000
           Size.Height = 30.000000000000000000
           Size.PlatformDefault = False
-          Text = ' 0 Hz'
+          Text = ' 2 Hz'
+          Value = 2.000000000000000000
           ValueScale = 1.000000000000000000
           Units = 'Hz'
           NumberFormat = '%.4g'
-          Min = -1.000000015047466E30
-          Max = 1.000000015047466E30
+          Min = 1.000000000000000000
+          Max = 100.000000000000000000
         end
       end
       object StimulationTypeGrp: TGroupBox
@@ -7754,10 +7756,15 @@ object MainFrm: TMainFrm
     end
     object mnHelp: TMenuItem
       Text = '&Help'
-      object mnHelpContents: TMenuItem
+      object mnContents: TMenuItem
         Locked = True
         Text = '&Contents'
-        OnClick = mnHelpContentsClick
+        OnClick = mnContentsClick
+      end
+      object mnWebHelp: TMenuItem
+        Locked = True
+        Text = '&Web Help'
+        OnClick = mnWebHelpClick
       end
     end
   end

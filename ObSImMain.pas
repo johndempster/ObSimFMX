@@ -72,6 +72,7 @@ unit ObSImMain;
 // 15.04.20  V4.0    Multi-device version on FireMonkey platform
 // 25.03.22          shared.pas removed from project file header KEY=VALUES strings in file header now saved/read using TStringLIst
 // 06.04.22          User dialogs now use ModalBoxFrm
+// 01.06.22  V4.0    Web Help link to GitHub Wiki added
 
 interface
 
@@ -130,7 +131,7 @@ type
     StyleBook1: TStyleBook;
     cbSolution: TComboBox;
     lbSaltSolution: TLabel;
-    cbAgonist: TComboBox;
+    cbAgonist: TComboBox ;
     cbAgonistStockConc: TComboBox;
     Label1: TLabel;
     Label2: TLabel;
@@ -194,6 +195,7 @@ type
     lbDilEqnDen: TLabel;
     bCalculate: TButton;
     cbTissueType: TComboBox;
+    mnWebHelp: TMenuItem;
     procedure FormShow(Sender: TObject);
     procedure TimerTimer(Sender: TObject);
     procedure bNewExperimentClick(Sender: TObject);
@@ -218,7 +220,7 @@ type
     procedure mnNewExperimentClick(Sender: TObject);
     procedure mnLoadExperimentClick(Sender: TObject);
     procedure mnSaveExperimentClick(Sender: TObject);
-    procedure mnHelpContentsClick(Sender: TObject);
+    procedure mnContentsClick(Sender: TObject);
     procedure mnPrintClick(Sender: TObject);
     procedure bCalculateClick(Sender: TObject);
     procedure cbDilutionResultChange(Sender: TObject);
@@ -229,6 +231,9 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure sbDisplayChange(Sender: TObject);
     procedure Action1Execute(Sender: TObject);
+    procedure edStimFrequencyKeyUp(Sender: TObject; var Key: Word;
+      var KeyChar: Char; Shift: TShiftState);
+    procedure mnWebHelpClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -476,6 +481,7 @@ procedure TMainFrm.NewExperiment ;
 // ------------------------------------
 var
     i : Integer ;
+    ZeroCaSolnAvailable : Boolean ;
 begin
 
     // Select tissue type from menu
@@ -487,6 +493,7 @@ begin
      // Configure experiment options
      Case Model.ModelType of
         tGPIleum : begin
+           StimulusGrp.Enabled := True ;
            rbNerve.Text := 'Nerve (10V,1ms)' ;
            rbNerve.IsChecked := True ;
            rbNerve.Enabled := True ;
@@ -500,12 +507,15 @@ begin
            ArterialRingSetup.Visible := False ;
            JejunumSetup.Visible := False ;
            ExperimentTab.Text := ' Experimental Setup (Guinea Pig Ileum) ' ;
+           UnknownTab.Text := 'Unknown' ;
+           ZeroCaSolnAvailable := False ;
            end ;
         tChickBiventer : begin
+           StimulusGrp.Enabled := True ;
            rbNerve.Text := 'Nerve' ;
            rbNerve.IsChecked := True ;
            rbNerve.Enabled := True ;
-           rbNerve.Text := 'Muscle' ;
+           rbMuscle.Text := 'Muscle' ;
            rbMuscle.Enabled := True ;
            JejunumStimGrp.Visible := False ;
            StimulationTypeGrp.Visible := True ;
@@ -514,8 +524,28 @@ begin
            ArterialRingSetup.Visible := False ;
            JejunumSetup.Visible := False ;
            ExperimentTab.Text := ' Experimental Setup (Chick Biventer Cervicis) ' ;
+           UnknownTab.Text := 'Unknown' ;
+           ZeroCaSolnAvailable := True ;
+           end ;
+        tRatDiaphragm : begin
+           StimulusGrp.Enabled := True ;
+           rbNerve.Text := 'Nerve' ;
+           rbNerve.IsChecked := True ;
+           rbNerve.Enabled := True ;
+           rbMuscle.Text := 'Muscle' ;
+           rbMuscle.Enabled := True ;
+           JejunumStimGrp.Visible := False ;
+           StimulationTypeGrp.Visible := True ;
+           GPIleumSetup.Visible := False ;
+           ChickBiventerSetup.Visible := True ;
+           ArterialRingSetup.Visible := False ;
+           JejunumSetup.Visible := False ;
+           ExperimentTab.Text := ' Experimental Setup (Rat Diaphragm Muscle) ' ;
+           UnknownTab.Text := 'Ion' ;
+           ZeroCaSolnAvailable := True ;
            end ;
         tArterialRing : begin
+           StimulusGrp.Enabled := False ;
            rbNerve.IsChecked := False ;
            rbNerve.Enabled := False ;
            rbMuscle.Enabled := False ;
@@ -526,8 +556,11 @@ begin
            ArterialRingSetup.Visible := True ;
            JejunumSetup.Visible := False ;
            ExperimentTab.Text := ' Experimental Setup (Rabbit Arterial Ring) ' ;
+           UnknownTab.Text := 'Unknown' ;
+           ZeroCaSolnAvailable := True ;
            end ;
         tJejunum : begin
+           StimulusGrp.Enabled := True ;
            JejunumStimGrp.Visible := True ;
            StimulationTypeGrp.Visible := False ;
            GPIleumSetup.Visible := False ;
@@ -535,20 +568,23 @@ begin
            ArterialRingSetup.Visible := False ;
            JejunumSetup.Visible := True ;
            ExperimentTab.Text := ' Experimental Setup (Rabbit Jejunum) ' ;
+           UnknownTab.Text := 'Unknown' ;
+           ZeroCaSolnAvailable := True ;
            end ;
         end ;
 
      // Solutions list
      cbSolution.Clear ;
      cbSolution.Items.AddObject( 'Krebs-Henseleit (normal)', TObject(NormalSoln)) ;
-     if Model.ModelType = tArterialRing then begin
+     if ZeroCaSolnAvailable then begin
         cbSolution.Items.AddObject( 'Krebs-Henseleit (0 Ca)', TObject(ZeroCaSoln)) ;
         end ;
      cbSolution.ItemIndex := 0 ;
 
 
      // Create list of agonists
-     Model.GetListOfDrugs( cbAgonist.Items, dtAgonist ) ;
+     cbAgonist.Clear ;
+     Model.GetListOfDrugs( cbAgonist, dtAgonist ) ;
      SetComboBoxFontSize( cbAgonist, 13 ) ;
 
      if cbAgonist.Items.Count > 0 then
@@ -559,7 +595,7 @@ begin
         end ;
 
      // Create list of agonists
-     Model.GetListOfDrugs( cbAntagonist.Items, dtAntagonist ) ;
+     Model.GetListOfDrugs( cbAntagonist, dtAntagonist ) ;
      SetComboBoxFontSize( cbAntagonist, 13 ) ;
      if cbAntagonist.Items.Count > 0 then
         begin
@@ -568,7 +604,7 @@ begin
         end ;
 
      // Create list of unknown drugs
-     Model.GetListOfDrugs( cbUnknown.Items, dtUnknown ) ;
+     Model.GetListOfDrugs( cbUnknown, dtUnknown ) ;
      SetComboBoxFontSize( cbUnknown, 13 ) ;
      if cbUnknown.Items.Count > 0 then
         begin
@@ -666,6 +702,18 @@ begin
     end;
 
 
+procedure TMainFrm.edStimFrequencyKeyUp(Sender: TObject; var Key: Word;
+  var KeyChar: Char; Shift: TShiftState);
+// -------------------------------------
+// Key pressed in Stimulus frequency box
+// -------------------------------------
+begin
+    if Key = 13 then
+       begin
+       Model.StimFrequency := EdStimFrequency.Value ;
+       end;
+end;
+
 procedure TMainFrm.edTDisplayKeyUp(Sender: TObject; var Key: Word;
   var KeyChar: Char; Shift: TShiftState);
 // ------------------------------
@@ -696,7 +744,7 @@ begin
        begin
        StartPoints := scDisplay.MaxPoints div 10 ;
        NumPointsDisplayed := StartPoints ;
-       scDisplay.NumPoints := NumPointsDisplayed ;
+       scDisplay.NumPoints := NumPointsDisplayed-1 ;
        sbDisplay.Max := sbDisplay.Max + scDisplay.MaxPoints ;
        edStartTime.Max := sbDisplay.Max ;
        sbDisplay.Value := NumPointsInBuf - StartPoints + 1 ;
@@ -847,12 +895,7 @@ begin
 
      if not bRecord.Enabled then
         begin
-        case Model.ModelType of
-             tGPIleum : Model.DoGPIleumSimulationStep(0.0) ;
-             tChickBiventer : Model.DoChickBiventerSimulationStep ;
-             tArterialRing : Model.DoArterialRingSimulationStep ;
-             tJejunum : Model.DoJejunumSimulationStep ;
-             end ;
+        Model.DoSimulationStep ;
         NewPoint := Model.ChanValues[0] ;
         UpdateDisplay( NewPoint ) ;
 //        InitialMixing := InitialMixing + 1 ;
@@ -1087,6 +1130,10 @@ begin
         Model.Drugs[Model.iCaBath].DisplayBathConcentration := 2.5E-3 ;
         end ;
 
+     // Magnesium concentration (1 mM)
+     Model.Drugs[Model.iMgBath].FinalBathConcentration := 1E-3 ;
+     Model.Drugs[Model.iMgBath].DisplayBathConcentration := 1E-3 ;
+
      // Set type of solution in bath
      if Integer(cbSolution.Items.Objects[cbSolution.ItemIndex])= ZeroCaSoln then
         begin
@@ -1188,6 +1235,7 @@ begin
      // Add chart annotation
      if Model.ModelType = tJejunum then
         begin
+        Model.NerveStimulation := True ;
         Model.StimFrequency := edStimFrequency.Value ;
         ChartAnnotation := format('Stim %.3gHz',[edStimFrequency.Value]) ;
         AddDrugMarker( ChartAnnotation ) ;
@@ -1258,6 +1306,7 @@ begin
      TissueGrp.Enabled := True ;
      bStimulationOff.Enabled := False ;
      bStimulationOn.Enabled := True ;
+     StimulationTypeGrp.Enabled := True ;
      Model.MuscleStimulation := False ;
      Model.NerveStimulation := False ;
 
@@ -1561,7 +1610,7 @@ begin
      end;
 
 
-procedure TMainFrm.mnHelpContentsClick(Sender: TObject);
+procedure TMainFrm.mnContentsClick(Sender: TObject);
 // -----------------------
 //  Help/Contents menu item
 //  -----------------------
@@ -1645,6 +1694,15 @@ begin
 
      end ;
 
+
+procedure TMainFrm.mnWebHelpClick(Sender: TObject);
+var
+  URL: string;
+begin
+  URL := 'https://github.com/johndempster/ObSimFMX/wiki';
+//  URL := StringReplace(URL, '"', '%22', [rfReplaceAll]);
+  ShellExecute(0, 'open', PChar(URL), nil, nil, SW_SHOWNORMAL);
+end;
 
 procedure TMainFrm.SetDilutionEquation ;
 begin
