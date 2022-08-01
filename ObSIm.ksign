@@ -1,0 +1,11 @@
+[Settings]
+256_pfx_pass=4C6974746C656265617230
+256_pfx_file=433A5C55736572735C4A6F686E5C446F776E6C6F6164735C436F6465205369676E696E672043657274204A6F686E2044656D70737465722E706678
+256_Description=
+256_DescriptionURL=
+1_pfx_pass=
+1_pfx_file=
+1_Description=
+1_DescriptionURL=
+files_to_sign=C:\Users\John\Documents\Embarcadero\Studio\Projects\WinEDRXE\WinEDR\Release\Single\WinEDR V4.0.3 Setup.exe
+

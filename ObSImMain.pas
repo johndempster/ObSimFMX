@@ -234,6 +234,8 @@ type
     procedure edStimFrequencyKeyUp(Sender: TObject; var Key: Word;
       var KeyChar: Char; Shift: TShiftState);
     procedure mnWebHelpClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char;
+      Shift: TShiftState);
 
   private
     { Private declarations }
@@ -356,6 +358,22 @@ begin
         if ModalBoxFrm.ShowModal = mrYes then CanClose := True
                                          else CanClose := False ;
         end;
+end;
+
+
+procedure TMainFrm.FormKeyDown(Sender: TObject; var Key: Word;
+  var KeyChar: Char; Shift: TShiftState);
+// ----------------------------
+// Process key presses on form
+// ----------------------------
+begin
+//
+//   Left and right arrow keys used to move vertical cursor on display
+
+     case key of
+          VK_LEFT : scDisplay.MoveActiveVerticalCursor(-1) ;
+          VK_RIGHT : scDisplay.MoveActiveVerticalCursor(1) ;
+          end ;
 end;
 
 
@@ -559,7 +577,8 @@ begin
            UnknownTab.Text := 'Unknown' ;
            ZeroCaSolnAvailable := True ;
            end ;
-        tJejunum : begin
+        else begin
+           // Jejunum
            StimulusGrp.Enabled := True ;
            JejunumStimGrp.Visible := True ;
            StimulationTypeGrp.Visible := False ;
@@ -580,7 +599,6 @@ begin
         cbSolution.Items.AddObject( 'Krebs-Henseleit (0 Ca)', TObject(ZeroCaSoln)) ;
         end ;
      cbSolution.ItemIndex := 0 ;
-
 
      // Create list of agonists
      cbAgonist.Clear ;
@@ -707,10 +725,15 @@ procedure TMainFrm.edStimFrequencyKeyUp(Sender: TObject; var Key: Word;
 // -------------------------------------
 // Key pressed in Stimulus frequency box
 // -------------------------------------
+var
+  ChartAnnotation : string ;
+
 begin
     if Key = 13 then
        begin
        Model.StimFrequency := EdStimFrequency.Value ;
+       ChartAnnotation := format('Stim %3gHz',[edStimFrequency.Value]) ;
+       AddDrugMarker( ChartAnnotation ) ;
        end;
 end;
 
@@ -1237,6 +1260,7 @@ begin
         begin
         Model.NerveStimulation := True ;
         Model.StimFrequency := edStimFrequency.Value ;
+        edStimFrequency.Value := edStimFrequency.Value ;
         ChartAnnotation := format('Stim %.3gHz',[edStimFrequency.Value]) ;
         AddDrugMarker( ChartAnnotation ) ;
         end
@@ -1388,6 +1412,8 @@ begin
                                 cbUnknownStockConc ) ;
       end;
 
+
+
 procedure TMainFrm.SaveToFile(
           FileName : String
           ) ;
@@ -1526,6 +1552,8 @@ begin
 
      // Get tissue type
      Model.ModelType := NativeInt(GetKeyValue( Header, 'TISTYPE', Model.ModelType )) ;
+     cbTissueType.ItemIndex := cbTissueType.Items.IndexOfObject(TObject(Model.ModelType)) ;
+     NewExperiment ;
 
      NumPointsInBuf := 0 ;
      NumPointsInBuf := GetKeyValue( Header, 'NPOINTS', NumPointsInBuf ) ;
@@ -1549,11 +1577,13 @@ begin
           Model.Drugs[i].EC50_CaChannelR := GetKeyValue( Header, format('DRG%d_CAR',[i]), Model.Drugs[i].EC50_CaChannelR ) ;
           end ;
 
+     NumMarkers := 0 ;
      NumMarkers := GetKeyValue( Header, 'NMARKERS', NumMarkers ) ;
      MarkerList.Clear ;
+     MarkerPoint := 0 ;
      for i := 0 to NumMarkers-1 do
          begin
-         MarkerPoint := GetKeyValue( Header, format('MKPOINT%d',[i]), MarkerPoint) ;
+         MarkerPoint := GetKeyValue( Header, format('MKPOINT%d',[i]), MarkerPoint ) ;
          MarkerPoint := GetKeyValue( Header, format('MKP%d',[i]), MarkerPoint) ;
          MarkerText := GetKeyValue( Header, format('MKTEXT%d',[i]), MarkerText ) ;
          MarkerText := GetKeyValue( Header, format('MKT%d',[i]), MarkerText ) ;

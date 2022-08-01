@@ -4,13 +4,14 @@ object MainFrm: TMainFrm
   Caption = 
     'ObSim V4.0 : Organ Bath SImulation (c) J. Dempster, University o' +
     'f Strathclyde (2004-2020) '
-  ClientHeight = 730
+  ClientHeight = 719
   ClientWidth = 1181
   StyleBook = StyleBook1
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnCloseQuery = FormCloseQuery
+  OnKeyDown = FormKeyDown
   OnShow = FormShow
   DesignerMasterStyle = 0
   object DisplayGrp: TGroupBox
@@ -18,7 +19,7 @@ object MainFrm: TMainFrm
     Position.X = 304.000000000000000000
     Position.Y = 55.000000000000000000
     Size.Width = 867.000000000000000000
-    Size.Height = 669.000000000000000000
+    Size.Height = 658.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 0
     object DisplayPage: TTabControl
@@ -26,18 +27,18 @@ object MainFrm: TMainFrm
       Position.X = 16.000000000000000000
       Position.Y = 16.000000000000000000
       Size.Width = 841.000000000000000000
-      Size.Height = 648.000000000000000000
+      Size.Height = 637.000000000000000000
       Size.PlatformDefault = False
       TabIndex = 0
       TabOrder = 1
       TabPosition = PlatformDefault
       Sizes = (
         841s
-        621s
+        610s
         841s
-        621s
+        610s
         841s
-        621s)
+        610s)
       object ChartTab: TTabItem
         CustomIcon = <
           item
@@ -57,7 +58,7 @@ object MainFrm: TMainFrm
           Position.X = 8.000000000000000000
           Position.Y = 40.000000000000000000
           Size.Width = 825.000000000000000000
-          Size.Height = 520.000000000000000000
+          Size.Height = 509.000000000000000000
           Size.PlatformDefault = False
           OnMouseUp = scDisplayMouseUp
           CursorChangeInProgress = False
@@ -100,7 +101,7 @@ object MainFrm: TMainFrm
         object TDisplayPanel: TPanel
           Anchors = [akLeft, akRight]
           Position.X = 8.000000000000000000
-          Position.Y = 567.646606445312500000
+          Position.Y = 557.201965332031200000
           Size.Width = 825.000000000000000000
           Size.Height = 44.000000000000000000
           Size.PlatformDefault = False
@@ -5462,7 +5463,7 @@ object MainFrm: TMainFrm
     Anchors = [akLeft, akTop, akBottom]
     Position.Y = 39.000000000000000000
     Size.Width = 289.000000000000000000
-    Size.Height = 669.000000000000000000
+    Size.Height = 658.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
     object TissueGrp: TGroupBox
