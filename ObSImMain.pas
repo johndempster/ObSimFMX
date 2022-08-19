@@ -73,6 +73,7 @@ unit ObSImMain;
 // 25.03.22          shared.pas removed from project file header KEY=VALUES strings in file header now saved/read using TStringLIst
 // 06.04.22          User dialogs now use ModalBoxFrm
 // 01.06.22  V4.0    Web Help link to GitHub Wiki added
+// 02.07.22  V4.1    Testing complete on Mac OS
 
 interface
 
@@ -331,6 +332,9 @@ uses
 {$IFDEF MSWINDOWS}
 winapi.shellapi,winapi.windows,
 {$ENDIF}
+{$IFDEF POSIX}
+Posix.Stdlib , Posix.Unistd,
+{$ENDIF POSIX}
 System.Math, FMX.DialogService, ModalBox ;
 
 {$R *.fmx}
@@ -371,8 +375,8 @@ begin
 //   Left and right arrow keys used to move vertical cursor on display
 
      case key of
-          VK_LEFT : scDisplay.MoveActiveVerticalCursor(-1) ;
-          VK_RIGHT : scDisplay.MoveActiveVerticalCursor(1) ;
+          VKLEFT : scDisplay.MoveActiveVerticalCursor(-1) ;
+          VKRIGHT : scDisplay.MoveActiveVerticalCursor(1) ;
           end ;
 end;
 
@@ -1650,10 +1654,6 @@ begin
      ShellExecute(0,'open', 'c:\windows\hh.exe',PChar(HelpFilePath),
      nil, SW_SHOWNORMAL) ;
     {$ENDIF}
-    {$IFDEF MACOS}
- //     _system(PAnsiChar('open ' + AnsiString(filename)));
-    {$ENDIF}
-
 
      end;
 
@@ -1726,12 +1726,21 @@ begin
 
 
 procedure TMainFrm.mnWebHelpClick(Sender: TObject);
+//
+// Web Help - Wiki from GitHub repository
+// --------------------------------------
 var
   URL: string;
 begin
   URL := 'https://github.com/johndempster/ObSimFMX/wiki';
-//  URL := StringReplace(URL, '"', '%22', [rfReplaceAll]);
+{$IFDEF MSWINDOWS}
+  URL := StringReplace(URL, '"', '%22', [rfReplaceAll]);
   ShellExecute(0, 'open', PChar(URL), nil, nil, SW_SHOWNORMAL);
+  {$ENDIF}
+
+  {$IFDEF MACOS}
+      _system(PAnsiChar('open ' + AnsiString(URL)));
+    {$ENDIF}
 end;
 
 procedure TMainFrm.SetDilutionEquation ;

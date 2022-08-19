@@ -18,16 +18,7 @@
     </ItemGroup>
     <ItemGroup Condition="'$(Platform)'=='Win64'"/>
     <ItemGroup Condition="'$(Platform)'=='OSX64'">
-        <DeployFile Include="OSX64\Debug\ObSIm.info.plist" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>ObSIm.app\Contents\</RemoteDir>
-            <RemoteName>Info.plist</RemoteName>
-            <DeployClass>ProjectOSXInfoPList</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="$(BDS)\bin\delphi_PROJECTICNS.icns" Condition="'$(Config)'=='Debug'">
+        <DeployFile Include="$(BDS)\bin\delphi_PROJECTICNS.icns" Condition="'$(Config)'=='Release'">
             <RemoteDir>ObSIm.app\Contents\Resources\</RemoteDir>
             <RemoteName>ObSIm.icns</RemoteName>
             <DeployClass>ProjectOSXResource</DeployClass>
@@ -40,6 +31,15 @@
             <RemoteDir>ObSIm.app\..\</RemoteDir>
             <RemoteName>ObSIm.entitlements</RemoteName>
             <DeployClass>ProjectOSXEntitlements</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Release\ObSIm.info.plist" Condition="'$(Config)'=='Release'">
+            <RemoteDir>ObSIm.app\Contents\</RemoteDir>
+            <RemoteName>Info.plist</RemoteName>
+            <DeployClass>ProjectOSXInfoPList</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
@@ -59,6 +59,52 @@
             <RemoteDir>ObSIm.app\..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF\</RemoteDir>
             <RemoteName>ObSIm</RemoteName>
             <DeployClass>ProjectOSXDebug</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Debug\ObSIm.info.plist" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>ObSIm.app\Contents\</RemoteDir>
+            <RemoteName>Info.plist</RemoteName>
+            <DeployClass>ProjectOSXInfoPList</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Release\ObSIm.entitlements" Condition="'$(Config)'=='Release'">
+            <RemoteDir>ObSIm.app\..\</RemoteDir>
+            <RemoteName>ObSIm.entitlements</RemoteName>
+            <DeployClass>ProjectOSXEntitlements</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Release\ObSIm.dSYM" Condition="'$(Config)'=='Release'">
+            <RemoteDir>ObSIm.app\..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF\</RemoteDir>
+            <RemoteName>ObSIm</RemoteName>
+            <DeployClass>ProjectOSXDebug</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Release\ObSIm" Condition="'$(Config)'=='Release'">
+            <RemoteDir>ObSIm.app\Contents\MacOS\</RemoteDir>
+            <RemoteName>ObSIm</RemoteName>
+            <DeployClass>ProjectOutput</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+            <Required>True</Required>
+        </DeployFile>
+        <DeployFile Include="OBSIM_Icon.icns" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>ObSIm.app\Contents\Resources\</RemoteDir>
+            <RemoteName>ObSIm.icns</RemoteName>
+            <DeployClass>ProjectOSXResource</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>

@@ -2,8 +2,8 @@ object MainFrm: TMainFrm
   Left = 0
   Top = 0
   Caption = 
-    'ObSim V4.0 : Organ Bath SImulation (c) J. Dempster, University o' +
-    'f Strathclyde (2004-2020) '
+    'ObSim V4.1 : Organ Bath SImulation (c) J. Dempster, University o' +
+    'f Strathclyde (2004-2022) '
   ClientHeight = 719
   ClientWidth = 1181
   StyleBook = StyleBook1
@@ -101,7 +101,7 @@ object MainFrm: TMainFrm
         object TDisplayPanel: TPanel
           Anchors = [akLeft, akRight]
           Position.X = 8.000000000000000000
-          Position.Y = 557.201965332031200000
+          Position.Y = 557.201965332031300000
           Size.Width = 825.000000000000000000
           Size.Height = 44.000000000000000000
           Size.PlatformDefault = False
@@ -5647,6 +5647,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object Label2: TLabel
           Position.X = 16.000000000000000000
@@ -5655,6 +5656,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddAgonist: TButton
           Hint = 'Add agonist to organ bath'
@@ -5731,6 +5733,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object Label4: TLabel
           Position.X = 16.000000000000000000
@@ -5739,6 +5742,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddAntagonist: TButton
           Position.X = 16.000000000000000000
@@ -5803,6 +5807,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object cbUnknownStockConc: TComboBox
           Hint = 'Select stock solution concentration (M)'
@@ -5821,6 +5826,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddUnknown: TButton
           Position.X = 16.000000000000000000
