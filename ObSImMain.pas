@@ -74,6 +74,7 @@ unit ObSImMain;
 // 06.04.22          User dialogs now use ModalBoxFrm
 // 01.06.22  V4.0    Web Help link to GitHub Wiki added
 // 02.07.22  V4.1    Testing complete on Mac OS
+// 23.08.22  V4.1    Build for Windows
 
 interface
 
