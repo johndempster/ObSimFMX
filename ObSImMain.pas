@@ -75,6 +75,8 @@ unit ObSImMain;
 // 01.06.22  V4.0    Web Help link to GitHub Wiki added
 // 02.07.22  V4.1    Testing complete on Mac OS
 // 23.08.22  V4.1    Build for Windows
+// 10.07.24  V4.1.2  Mac Sonomo display bug fixed
+// 17.07.24 V4.1.3   Antagonists & Unknowns can now be added to both organ bath & reservoir
 
 interface
 
@@ -198,6 +200,8 @@ type
     bCalculate: TButton;
     cbTissueType: TComboBox;
     mnWebHelp: TMenuItem;
+    cbAddAntagonistTo: TComboBox;
+    cbAddUnknownTo: TComboBox;
     procedure FormShow(Sender: TObject);
     procedure TimerTimer(Sender: TObject);
     procedure bNewExperimentClick(Sender: TObject);
@@ -617,7 +621,7 @@ begin
         SetStockConcentrationList( NativeInt(cbAgonist.Items.Objects[cbAgonist.ItemIndex]),cbAgonistStockConc ) ;
         end ;
 
-     // Create list of agonists
+     // Create list of Antagonists
      Model.GetListOfDrugs( cbAntagonist, dtAntagonist ) ;
      SetComboBoxFontSize( cbAntagonist, 13 ) ;
      if cbAntagonist.Items.Count > 0 then
@@ -632,7 +636,7 @@ begin
      if cbUnknown.Items.Count > 0 then
         begin
         cbUnknown.ItemIndex := 0 ;
-        SetStockConcentrationList( NativeInt(cbUnknown.Items.Objects[cbAntagonist.ItemIndex]),cbUnknownStockConc ) ;
+        SetStockConcentrationList( NativeInt(cbUnknown.Items.Objects[cbUnknown.ItemIndex]),cbUnknownStockConc ) ;
         end ;
 
      { Clear buffer  }
@@ -785,7 +789,7 @@ begin
        end
     else
        begin
-       scDisplay.DisplayNewPoints( NumPointsInBuf - 1 - scDisplay.XOffset ) ;
+       scDisplay.DisplayNewPoints( NumPointsInBuf - 1 - scDisplay.XOffset, True ) ;
        end;
 
     //scDisplay.Invalidate ;
@@ -957,7 +961,8 @@ procedure TMainFrm.AddDrugMarker(
 // Add drug addition/wash marker
 // ------------------------------
 begin
-     if MarkerList.Count < MaxMarkers then begin
+     if MarkerList.Count < MaxMarkers then
+        begin
         ChartAnnotation := ReplaceStr( ChartAnnotation, '-00', '-' ) ;
         ChartAnnotation := ReplaceStr( ChartAnnotation, '00E', '0E' ) ;
         MarkerList.AddObject( ChartAnnotation, TObject(NumPointsInBuf) ) ;
@@ -1012,91 +1017,137 @@ begin
 
 
 procedure TMainFrm.bAddAntagonistClick(Sender: TObject);
-// -----------------------------------------------
-// Add volume of antagonist stock solution to bath
-// -----------------------------------------------
+// ------------------------------------------------------------
+// Add volume of Antagonist stock solution to reservoir or bath
+// ------------------------------------------------------------
 var
-     StockConcentration : Double ;
-     AddedConcentration : Double ;
-     iDrug : NativeInt ;
+     StockConcentration : Single ;
+     AddedConcentration : Single ;
+     iDrug : Integer ;
      ChartAnnotation : String ;
 begin
 
-     if edAntagonistVolume.Value > MaxSyringeVolume then
-        begin
+     if edAntagonistVolume.Value > MaxSyringeVolume then begin
         ShowMessage( format('Syringe can only deliver %.1f ml',[MaxSyringeVolume])) ;
         Exit ;
         end ;
-
-     // Add drug
-     iDrug :=NativeInt(cbAntagonist.Items.Objects[cbAntagonist.ItemIndex]) ;
-     StockConcentration := GetConcentration( cbAntagonistStockConc.Items[cbAntagonistStockConc.ItemIndex]) ;
-
-     // Calculate change in final bath concentration
-     AddedConcentration :=  (StockConcentration*edAntagonistVolume.Value) / Model.BathVolume ;
      edAntagonistVolume.Value := edAntagonistVolume.Value ;
 
-     // Update display bath concentration
-     Model.Drugs[iDrug].DisplayBathConcentration := Model.Drugs[iDrug].DisplayBathConcentration
-                                            + AddedConcentration ;
+     // Add drug
+     iDrug := Integer(cbAntagonist.Items.Objects[cbAntagonist.ItemIndex]) ;
+     StockConcentration := GetConcentration( cbAntagonistStockConc.Items[cbAntagonistStockConc.ItemIndex]) ;
 
-     // Update final bath concentration (with 10% C.V. random variability to simulation variation in response)
-     Model.Drugs[iDrug].FinalBathConcentration := Model.Drugs[iDrug].FinalBathConcentration
-                                            + AddedConcentration*RandG(1.0,0.1) ;
+     if cbAddAntagonistTo.ItemIndex = 0 then
+        begin
+          // Add to bath
+          // -----------
+         // Calculate change in final bath concentration
+         AddedConcentration :=  (StockConcentration*edAntagonistVolume.Value) / Model.BathVolume ;
 
-     Model.RMax := Model.NextRMax ;
+         // Add drug to display conc.
+         Model.Drugs[iDrug].DisplayBathConcentration := Model.Drugs[iDrug].DisplayBathConcentration
+                                                        + AddedConcentration ;
 
-     // Add chart annotation
-     ChartAnnotation := format('%s %.3e %s',
-                        [Model.Drugs[iDrug].ShortName,
-                         Model.Drugs[iDrug].DisplayBathConcentration,
-                         Model.Drugs[iDrug].Units] ) ;
-     AddDrugMarker( ChartAnnotation ) ;
+         // Add drug to final conc. (with 10% C.V. variability)
+         Model.Drugs[iDrug].FinalBathConcentration := Model. Drugs[iDrug].FinalBathConcentration
+                                                      + AddedConcentration*RandG(1.0,0.1) ;
+
+         // Add chart annotation
+         ChartAnnotation := format('%s %.3e %s',
+                            [Model.Drugs[iDrug].ShortName,
+                             Model.Drugs[iDrug].DisplayBathConcentration,
+                             Model.Drugs[iDrug].Units] ) ;
+         AddDrugMarker( ChartAnnotation ) ;
+
+         end
+     else
+        begin
+          // Add to reservoir
+
+          // Calculate change in reservoir concentration
+          AddedConcentration :=  (StockConcentration*edAntagonistVolume.Value) / Model.ReservoirVolume ;
+         // Update reservoir display conc.
+         Model.ReservoirDrugs[iDrug].DisplayBathConcentration := Model.ReservoirDrugs[iDrug].DisplayBathConcentration
+                                                                 + AddedConcentration ;
+         // Update reservoir (with 10% C.V. variability)
+         Model.ReservoirDrugs[iDrug].FinalBathConcentration := Model.ReservoirDrugs[iDrug].FinalBathConcentration
+                                                               + AddedConcentration*RandG(1.0,0.1) ;
+         // Add chart annotation
+         ChartAnnotation := format('%s %.3g %s (RES)',
+                        [Model.ReservoirDrugs[iDrug].ShortName,
+                         Model.ReservoirDrugs[iDrug].DisplayBathConcentration,
+                         Model.ReservoirDrugs[iDrug].Units]) ;
+
+         AddDrugMarker( ChartAnnotation ) ;
+         end ;
      Model.InitialMixing := 0 ;
      end;
 
 
 procedure TMainFrm.bAddUnknownClick(Sender: TObject);
-// -------------------------------------------------
-// Add volume of unknown drug stock solution to bath
-// -------------------------------------------------
+// ------------------------------------------------------------
+// Add volume of Antagonist stock solution to reservoir or bath
+// ------------------------------------------------------------
 var
      StockConcentration : Single ;
      AddedConcentration : Single ;
-     iDrug : NativeInt ;
+     iDrug : Integer ;
      ChartAnnotation : String ;
 begin
 
-     if edUnknownVolume.Value > MaxSyringeVolume then
-        begin
+     if edUNknownVolume.Value > MaxSyringeVolume then begin
         ShowMessage( format('Syringe can only deliver %.1f ml',[MaxSyringeVolume])) ;
         Exit ;
         end ;
+     edUNknownVolume.Value := edUNknownVolume.Value ;
 
      // Add drug
-     iDrug := NativeInt(cbUnknown.Items.Objects[cbUnknown.ItemIndex]) ;
-     StockConcentration := GetConcentration( cbUnknownStockConc.Items[cbUnknownStockConc.ItemIndex]) ;
+     iDrug := Integer(cbUNknown.Items.Objects[cbUNknown.ItemIndex]) ;
+     StockConcentration := GetConcentration( cbUNknownStockConc.Items[cbUNknownStockConc.ItemIndex]) ;
 
-     // Calculate change in final bath concentration
-     AddedConcentration :=  (StockConcentration*edUnknownVolume.Value) / Model.BathVolume ;
-     edUnknownVolume.Value := edUnknownVolume.Value ;
+     if cbAddUNknownTo.ItemIndex = 0 then
+        begin
+          // Add to bath
+          // -----------
+         // Calculate change in final bath concentration
+         AddedConcentration :=  (StockConcentration*edUNknownVolume.Value) / Model.BathVolume ;
 
-     // Update display bath concentration
-     Model.Drugs[iDrug].DisplayBathConcentration := Model.Drugs[iDrug].DisplayBathConcentration
-                                            + AddedConcentration ;
+         // Add drug to display conc.
+         Model.Drugs[iDrug].DisplayBathConcentration := Model.Drugs[iDrug].DisplayBathConcentration
+                                                        + AddedConcentration ;
 
-     // Update final bath concentration (with 10% C.V. random variability to simulation variation in response)
-     Model.Drugs[iDrug].FinalBathConcentration := Model.Drugs[iDrug].FinalBathConcentration
-                                            + AddedConcentration*RandG(1.0,0.1) ;
+         // Add drug to final conc. (with 10% C.V. variability)
+         Model.Drugs[iDrug].FinalBathConcentration := Model. Drugs[iDrug].FinalBathConcentration
+                                                      + AddedConcentration*RandG(1.0,0.1) ;
 
-     Model.RMax := Model.NextRMax ;
+         // Add chart annotation
+         ChartAnnotation := format('%s %.3e %s',
+                            [Model.Drugs[iDrug].ShortName,
+                             Model.Drugs[iDrug].DisplayBathConcentration,
+                             Model.Drugs[iDrug].Units] ) ;
+         AddDrugMarker( ChartAnnotation ) ;
 
-     // Add chart annotation
-     ChartAnnotation := format('%s %.3e %s',
-                        [Model.Drugs[iDrug].ShortName,
-                         Model.Drugs[iDrug].DisplayBathConcentration,
-                         Model.Drugs[iDrug].Units] ) ;
-     AddDrugMarker( ChartAnnotation ) ;
+         end
+     else
+        begin
+          // Add to reservoir
+
+          // Calculate change in reservoir concentration
+          AddedConcentration :=  (StockConcentration*edUNknownVolume.Value) / Model.ReservoirVolume ;
+         // Update reservoir display conc.
+         Model.ReservoirDrugs[iDrug].DisplayBathConcentration := Model.ReservoirDrugs[iDrug].DisplayBathConcentration
+                                                                 + AddedConcentration ;
+         // Update reservoir (with 10% C.V. variability)
+         Model.ReservoirDrugs[iDrug].FinalBathConcentration := Model.ReservoirDrugs[iDrug].FinalBathConcentration
+                                                               + AddedConcentration*RandG(1.0,0.1) ;
+         // Add chart annotation
+         ChartAnnotation := format('%s %.3g %s (RES)',
+                        [Model.ReservoirDrugs[iDrug].ShortName,
+                         Model.ReservoirDrugs[iDrug].DisplayBathConcentration,
+                         Model.ReservoirDrugs[iDrug].Units]) ;
+
+         AddDrugMarker( ChartAnnotation ) ;
+         end ;
      Model.InitialMixing := 0 ;
      end;
 

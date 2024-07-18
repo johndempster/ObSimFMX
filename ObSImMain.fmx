@@ -2,10 +2,10 @@ object MainFrm: TMainFrm
   Left = 0
   Top = 0
   Caption = 
-    'ObSim V4.1 : Organ Bath SImulation (c) J. Dempster, University o' +
-    'f Strathclyde (2004-2022) '
-  ClientHeight = 719
-  ClientWidth = 1181
+    'ObSim V4.1.3 : Organ Bath SImulation (c) J. Dempster, University' +
+    ' of Strathclyde (2004-2024) '
+  ClientHeight = 720
+  ClientWidth = 1180
   StyleBook = StyleBook1
   FormFactor.Width = 320
   FormFactor.Height = 480
@@ -5590,8 +5590,8 @@ object MainFrm: TMainFrm
     end
     object DrugsTab: TTabControl
       Anchors = [akLeft, akTop, akRight]
-      Position.X = 10.000000000000000000
-      Position.Y = 216.000000000000000000
+      Position.X = 8.000000000000000000
+      Position.Y = 215.000000000000000000
       Size.Width = 265.000000000000000000
       Size.Height = 209.000000000000000000
       Size.PlatformDefault = False
@@ -5622,7 +5622,7 @@ object MainFrm: TMainFrm
           Hint = 'Select agonist drug'
           DropDownKind = Custom
           Position.X = 16.000000000000000000
-          Position.Y = 14.000000000000000000
+          Position.Y = 13.000000000000000000
           Size.Width = 233.000000000000000000
           Size.Height = 33.000000000000000000
           Size.PlatformDefault = False
@@ -5647,6 +5647,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 2
         end
         object Label2: TLabel
           Position.X = 16.000000000000000000
@@ -5655,11 +5656,12 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 3
         end
         object bAddAgonist: TButton
           Hint = 'Add agonist to organ bath'
           Position.X = 16.000000000000000000
-          Position.Y = 134.000000000000000000
+          Position.Y = 132.000000000000000000
           Size.Width = 233.000000000000000000
           Size.Height = 33.000000000000000000
           Size.PlatformDefault = False
@@ -5722,7 +5724,7 @@ object MainFrm: TMainFrm
           Size.Width = 105.000000000000000000
           Size.Height = 33.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 1
+          TabOrder = 2
         end
         object Label3: TLabel
           Position.X = 16.000000000000000000
@@ -5731,6 +5733,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 3
         end
         object Label4: TLabel
           Position.X = 16.000000000000000000
@@ -5739,21 +5742,22 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 4
         end
         object bAddAntagonist: TButton
           Position.X = 16.000000000000000000
-          Position.Y = 134.000000000000000000
-          Size.Width = 233.000000000000000000
+          Position.Y = 132.000000000000000000
+          Size.Width = 86.000000000000000000
           Size.Height = 33.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 4
-          Text = 'Add To Organ Bath'
+          TabOrder = 5
+          Text = 'Add To '
           OnClick = bAddAntagonistClick
         end
         object edAntagonistVolume: TSESNumberBox
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           StyleLookup = 'SESNumberBoxstyle'
-          TabOrder = 5
+          TabOrder = 6
           Hint = 'Add volume (<=1ml) of antagonist'
           Position.X = 144.000000000000000000
           Position.Y = 94.000000000000000000
@@ -5769,13 +5773,28 @@ object MainFrm: TMainFrm
           Min = -1.000000015047466E30
           Max = 1.000000015047466E30
         end
+        object cbAddAntagonistTo: TComboBox
+          Hint = 'Select where drug is to be injected'
+          Items.Strings = (
+            'Organ Bath'
+            'Reservoir')
+          ItemIndex = 0
+          Position.X = 110.000000000000000000
+          Position.Y = 132.000000000000000000
+          Size.Width = 139.000000000000000000
+          Size.Height = 33.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 1
+          ParentShowHint = False
+          ShowHint = True
+        end
       end
       object UnknownTab: TTabItem
         CustomIcon = <
           item
           end>
         IsSelected = False
-        Size.Width = 80.000000000000000000
+        Size.Width = 79.000000000000000000
         Size.Height = 27.000000000000000000
         Size.PlatformDefault = False
         StyleLookup = ''
@@ -5803,6 +5822,7 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stock Soln.'
+          TabOrder = 3
         end
         object cbUnknownStockConc: TComboBox
           Hint = 'Select stock solution concentration (M)'
@@ -5812,7 +5832,7 @@ object MainFrm: TMainFrm
           Size.Height = 33.000000000000000000
           Size.PlatformDefault = False
           StyleLookup = 'ComboBoxstyle'
-          TabOrder = 1
+          TabOrder = 2
         end
         object Label6: TLabel
           Position.X = 16.000000000000000000
@@ -5821,21 +5841,22 @@ object MainFrm: TMainFrm
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           Text = 'Volume (ml)'
+          TabOrder = 4
         end
         object bAddUnknown: TButton
           Position.X = 16.000000000000000000
-          Position.Y = 134.000000000000000000
-          Size.Width = 233.000000000000000000
+          Position.Y = 132.000000000000000000
+          Size.Width = 86.000000000000000000
           Size.Height = 33.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 4
-          Text = 'Add To Organ Bath'
+          TabOrder = 5
+          Text = 'Add To '
           OnClick = bAddUnknownClick
         end
         object edUnknownVolume: TSESNumberBox
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           StyleLookup = 'SESNumberBoxstyle'
-          TabOrder = 5
+          TabOrder = 6
           Hint = 'Add volume (<=1ml) of unknown drug '
           Position.X = 144.000000000000000000
           Position.Y = 94.000000000000000000
@@ -5850,6 +5871,21 @@ object MainFrm: TMainFrm
           NumberFormat = '%.4g'
           Min = -1.000000015047466E30
           Max = 1.000000015047466E30
+        end
+        object cbAddUnknownTo: TComboBox
+          Hint = 'Select where drug is to be injected'
+          Items.Strings = (
+            'Organ Bath'
+            'Reservoir')
+          ItemIndex = 0
+          Position.X = 110.000000000000000000
+          Position.Y = 132.000000000000000000
+          Size.Width = 139.000000000000000000
+          Size.Height = 33.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 1
+          ParentShowHint = False
+          ShowHint = True
         end
       end
     end
@@ -7710,12 +7746,12 @@ object MainFrm: TMainFrm
     Top = 624
   end
   object MenuBar1: TMenuBar
-    Size.Width = 1181.000000000000000000
+    Size.Width = 1180.000000000000000000
     Size.Height = 49.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
     object mnFile: TMenuItem
-      Text = '&FIle'
+      Text = '&File'
       object mnNewExperiment: TMenuItem
         Locked = True
         Text = '&New Experiment'

@@ -33,7 +33,7 @@ const
     MeanRMax = 15.0 ;
     RMaxStDev = 0.05 ;
     cBathVolume = 10.0 ;          // Organ bath volume (ml)
-    ReservoirVolume = 1000.0 ;   // Krebs solution reservoir volume (ml)
+    cReservoirVolume = 1000.0 ;   // Krebs solution reservoir volume (ml)
     dt = 0.15 ;                    // Simulation time step (s)
 
 type
@@ -130,6 +130,7 @@ type
     iMgBath : Integer ;                                 // Bath Mg concentration index
     InitialMixing : Cardinal ;
     BathVolume : Single ;                               // Volume of organ bath (ml)
+    ReservoirVolume : Single ;                          // Volume of reservoir (ml)
 
     procedure GetListOfModels( Models : TStrings ) ;
     procedure InitialiseModel( NewModelType : Integer ) ;
@@ -171,6 +172,7 @@ begin
     ChanValues[0] := 0.0 ;
 
     BathVolume := cBathVolume ;
+    ReservoirVolume := cReservoirVolume ;
     tStimulationPeriod := 2.5 ;
 
 end;

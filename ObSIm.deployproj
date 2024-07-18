@@ -4,21 +4,19 @@
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
     <PropertyGroup/>
-    <ItemGroup Condition="'$(Platform)'=='Win32'">
-        <DeployFile Include="Win32\Debug\ObSIm.exe" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>ObSIm\</RemoteDir>
-            <RemoteName>ObSIm.exe</RemoteName>
+    <ItemGroup Condition="'$(Platform)'=='Win64'"/>
+    <ItemGroup Condition="'$(Platform)'=='OSX64'">
+        <DeployFile Include="OSX64\Release\ObSIm" Condition="'$(Config)'=='Release'">
+            <RemoteDir>ObSIm.app\Contents\MacOS\</RemoteDir>
+            <RemoteName>ObSIm</RemoteName>
             <DeployClass>ProjectOutput</DeployClass>
-            <Operation>0</Operation>
+            <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
             <Required>True</Required>
         </DeployFile>
-    </ItemGroup>
-    <ItemGroup Condition="'$(Platform)'=='Win64'"/>
-    <ItemGroup Condition="'$(Platform)'=='OSX64'">
-        <DeployFile Include="$(BDS)\bin\delphi_PROJECTICNS.icns" Condition="'$(Config)'=='Release'">
+        <DeployFile Include="ObSIm_Icns3.icns" Condition="'$(Config)'=='Debug'">
             <RemoteDir>ObSIm.app\Contents\Resources\</RemoteDir>
             <RemoteName>ObSIm.icns</RemoteName>
             <DeployClass>ProjectOSXResource</DeployClass>
@@ -31,34 +29,6 @@
             <RemoteDir>ObSIm.app\..\</RemoteDir>
             <RemoteName>ObSIm.entitlements</RemoteName>
             <DeployClass>ProjectOSXEntitlements</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="OSX64\Release\ObSIm.info.plist" Condition="'$(Config)'=='Release'">
-            <RemoteDir>ObSIm.app\Contents\</RemoteDir>
-            <RemoteName>Info.plist</RemoteName>
-            <DeployClass>ProjectOSXInfoPList</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="OSX64\Debug\ObSIm" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>ObSIm.app\Contents\MacOS\</RemoteDir>
-            <RemoteName>ObSIm</RemoteName>
-            <DeployClass>ProjectOutput</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-            <Required>True</Required>
-        </DeployFile>
-        <DeployFile Include="OSX64\Debug\ObSIm.dSYM" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>ObSIm.app\..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF\</RemoteDir>
-            <RemoteName>ObSIm</RemoteName>
-            <DeployClass>ProjectOSXDebug</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
@@ -82,16 +52,16 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="OSX64\Release\ObSIm.dSYM" Condition="'$(Config)'=='Release'">
-            <RemoteDir>ObSIm.app\..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF\</RemoteDir>
-            <RemoteName>ObSIm</RemoteName>
-            <DeployClass>ProjectOSXDebug</DeployClass>
+        <DeployFile Include="ObSIm_Icns5.icns" Condition="'$(Config)'=='Release'">
+            <RemoteDir>ObSIm.app\Contents\Resources\</RemoteDir>
+            <RemoteName>ObSIm.icns</RemoteName>
+            <DeployClass>ProjectOSXResource</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="OSX64\Release\ObSIm" Condition="'$(Config)'=='Release'">
+        <DeployFile Include="OSX64\Debug\ObSIm" Condition="'$(Config)'=='Debug'">
             <RemoteDir>ObSIm.app\Contents\MacOS\</RemoteDir>
             <RemoteName>ObSIm</RemoteName>
             <DeployClass>ProjectOutput</DeployClass>
@@ -101,7 +71,7 @@
             <Overwrite>True</Overwrite>
             <Required>True</Required>
         </DeployFile>
-        <DeployFile Include="OBSIM_Icon.icns" Condition="'$(Config)'=='Debug'">
+        <DeployFile Include="$(BDS)\bin\delphi_PROJECTICNS.icns" Condition="'$(Config)'=='Debug'">
             <RemoteDir>ObSIm.app\Contents\Resources\</RemoteDir>
             <RemoteName>ObSIm.icns</RemoteName>
             <DeployClass>ProjectOSXResource</DeployClass>
@@ -110,5 +80,16 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
+        <DeployFile Include="OSX64\Release\ObSIm.info.plist" Condition="'$(Config)'=='Release'">
+            <RemoteDir>ObSIm.app\Contents\</RemoteDir>
+            <RemoteName>Info.plist</RemoteName>
+            <DeployClass>ProjectOSXInfoPList</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
     </ItemGroup>
+    <ItemGroup Condition="'$(Platform)'=='Win32'"/>
+    <ItemGroup Condition="'$(Platform)'=='OSXARM64'"/>
 </Project>

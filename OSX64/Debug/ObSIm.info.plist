@@ -9,7 +9,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>ObSIm</string>
 	<key>CFBundleVersion</key>
-	<string>4.1.0</string>
+	<string>4.1.3</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundlePackageType</key>
@@ -50,6 +50,8 @@
 	<string>The reason for accessing files on a removable volume</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>The reason for requesting to send user data to Apple's speech recognition servers</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 
 	<key>CFBundleIconFile</key>
 	<string>ObSIm.icns</string>
