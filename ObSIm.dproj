@@ -6,7 +6,7 @@
         <MainSource>ObSIm.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Release</Config>
-        <Platform Condition="'$(Platform)'==''">OSX64</Platform>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>4099</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
@@ -217,9 +217,6 @@
         </DCCReference>
         <DCCReference Include="ModalBox.pas">
             <Form>ModalBoxFrm</Form>
-        </DCCReference>
-        <DCCReference Include="FMX.Platform.Mac.pas">
-            <Form>$ENDIF</Form>
         </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
